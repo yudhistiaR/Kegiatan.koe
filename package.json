@@ -9,10 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@clerk/backend": "^1.24.3",
     "@clerk/nextjs": "^6.12.0",
+    "@prisma/client": "^6.4.1",
     "@radix-ui/react-slot": "^1.1.2",
+    "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.475.0",
     "next": "15.1.7",
     "next-themes": "^0.4.4",
@@ -20,7 +24,9 @@
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
     "tailwind-merge": "^3.0.2",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "winston": "^3.17.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -28,6 +34,7 @@
     "eslint-config-next": "15.1.7",
     "eslint-config-prettier": "^10.0.1",
     "postcss": "^8",
+    "prisma": "^6.4.1",
     "tailwindcss": "^3.4.1"
   }
 }

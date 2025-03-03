@@ -1,7 +1,9 @@
+import OrganisasiBanner from '@/components/commont/OrganisasiBanner'
+
 const OrganisasiPage = () => {
   return (
     <div>
-      <h1>Home Page</h1>
+      <OrganisasiBanner />
     </div>
   )
 }

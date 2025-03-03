@@ -1,9 +1,9 @@
 import './globals.css'
 
 //Context
-import { ThemeContext } from '@/contexts/ThemeContext'
 import { SidebarProvider } from '@/contexts/SidebarContext'
 import { ClerkProvider } from '@clerk/nextjs'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 
 export const metadata = {
   title: 'Kegiatan.koe',
@@ -14,12 +14,17 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <ThemeContext attribute="class">
-          <SidebarProvider>
-            <body>{children}</body>
-          </SidebarProvider>
-        </ThemeContext>
+      <html lang="id">
+        <body>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SidebarProvider>{children}</SidebarProvider>
+          </ThemeProvider>
+        </body>
       </html>
     </ClerkProvider>
   )

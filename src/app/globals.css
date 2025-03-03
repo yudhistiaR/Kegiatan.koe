@@ -4,17 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    h1 {
-      @apply text-primary-100 text-4xl font-bold;
-    }
-    p {
-      @apply text-lg text-zinc-400;
-    }
-  }
-}
-
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
