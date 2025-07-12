@@ -15,13 +15,18 @@ import {
   AlertCircle
 } from 'lucide-react'
 import DOMPurify from 'dompurify'
+import {
+  LoadingState,
+  NotDataState,
+  ErrorState
+} from '@/components/LoadState/LoadStatus'
 
 const NotulensiList = () => {
   const { orgId } = useAuth()
   const { prokerId } = useParams()
   const [openDivisi, setOpenDivisi] = useState({})
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, isPending, error } = useQuery({
     queryKey: ['notulensi', orgId, prokerId],
     queryFn: async () => {
       const response = await fetch(
@@ -39,56 +44,19 @@ const NotulensiList = () => {
     retry: 2
   })
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen p-6 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto"></div>
-          <p className="mt-4">Memuat data notulensi...</p>
-        </div>
-      </div>
-    )
+  // Load state
+  if (isLoading | isPending) {
+    return <LoadingState />
   }
-
-  // Error state
   if (error) {
-    return (
-      <div className="min-h-screen p-6 flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Gagal memuat data
-          </h2>
-          <p className="text-gray-600 mb-4">
-            {error.message || 'Terjadi kesalahan saat mengambil data notulensi'}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            Coba Lagi
-          </button>
-        </div>
-      </div>
-    )
+    return <ErrorState />
   }
-
-  // No data state
   if (!data || !Array.isArray(data) || data.length === 0) {
-    return (
-      <div className="min-h-screen p-6 flex items-center justify-center">
-        <div className="text-center">
-          <FileText className="w-12 h-12 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold  mb-2">Tidak ada notulensi</h2>
-          <p>Belum ada data notulensi untuk program kerja ini.</p>
-        </div>
-      </div>
-    )
+    return <NotDataState />
   }
 
   // Group data by division
-  const groupedByDivisi = data.reduce((acc, item) => {
+  const groupedByDivisi = data?.reduce((acc, item) => {
     const divisiName = item.divisi?.name || 'Divisi Tidak Diketahui'
     if (!acc[divisiName]) {
       acc[divisiName] = {
@@ -118,7 +86,6 @@ const NotulensiList = () => {
       return 'Tanggal tidak valid'
     }
   }
-
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-6xl mx-auto">

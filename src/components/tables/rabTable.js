@@ -11,6 +11,7 @@ import {
   flexRender,
   createColumnHelper
 } from '@tanstack/react-table'
+import { LoadingState, NotDataState, ErrorState } from '../LoadState/LoadStatus'
 
 export default function RABTable() {
   const { orgId } = useAuth()
@@ -41,17 +42,29 @@ export default function RABTable() {
   const {
     data: rabProker,
     isLoading,
-    isPending
+    isPending,
+    error
   } = useQuery({
     queryKey: ['rab-proker', orgId, prokerId],
     queryFn: async () => {
       const req = await fetch(`/api/v1/proker/${orgId}/${prokerId}/rab`)
       const response = await req.json()
-      console.log(response)
       return Array.isArray(response) ? response : response.data || []
     },
+    enabled: !orgId | !prokerId,
     select: groupByDivision
   })
+
+  //LoadStatus
+  if (isLoading | isPending) {
+    return <LoadingState />
+  }
+  if (error) {
+    return <ErrorState error={error} />
+  }
+  if (!rabProker | !Array.isArray(rabProker) | (rabProker.length === 0)) {
+    return <NotDataState />
+  }
 
   // Pastikan data sudah tersedia sebelum digunakan
   const groupedData = rabProker || {}
@@ -221,98 +234,6 @@ export default function RABTable() {
                 </tr>
               </tfoot>
             </table>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Loading state
-  if (isLoading || isPending) {
-    return (
-      <div className="max-w-7xl mx-auto p-6 min-h-screen">
-        <div className="space-y-6">
-          {/* Header Skeleton */}
-          <div className="rounded-xl shadow-lg p-8 border border-gray-200">
-            <div className="animate-pulse">
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="h-8 rounded w-80 mb-2"></div>
-                  <div className="h-4 rounded w-60"></div>
-                </div>
-                <div className="text-right">
-                  <div className="h-10 rounded w-40 mb-1"></div>
-                  <div className="h-4 rounded w-24"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats Skeleton */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => (
-              <div key={i} className=" rounded-xl shadow-lg p-6 border ">
-                <div className="animate-pulse flex items-center">
-                  <div className="w-12 h-12  rounded-lg"></div>
-                  <div className="ml-4">
-                    <div className="h-8  rounded w-16 mb-2"></div>
-                    <div className="h-4 rounded w-20"></div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Tables Skeleton */}
-          <div className="space-y-6">
-            {[1, 2].map(i => (
-              <div
-                key={i}
-                className="rounded-lg shadow-lg border border-gray-200"
-              >
-                <div className="animate-pulse">
-                  <div className=" px-6 py-4 border-b">
-                    <div className="h-6 rounded w-32"></div>
-                  </div>
-                  <div className="p-6 space-y-4">
-                    {[1, 2, 3].map(j => (
-                      <div key={j} className="h-12 rounded"></div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Error state - jika tidak ada data
-  if (!groupedData || Object.keys(groupedData).length === 0) {
-    return (
-      <div className="max-w-7xl mx-auto p-6 min-h-screen">
-        <div className="rounded-xl shadow-lg p-8 border border-gray-200">
-          <div className="text-center py-12">
-            <svg
-              className="w-16 h-16 text-gray-400 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">
-              Rencana Anggaran Biaya (RAB)
-            </h1>
-            <p className="text-gray-500">
-              Belum ada data RAB untuk program kerja ini.
-            </p>
           </div>
         </div>
       </div>

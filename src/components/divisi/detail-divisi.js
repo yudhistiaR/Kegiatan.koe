@@ -43,6 +43,7 @@ import Multipleselect from '../ui/CustomeSelect'
 import { buttonVariants } from '../ui/button'
 import { useAuth } from '@clerk/nextjs'
 import { toast } from 'sonner'
+import { LoadingState, ErrorState } from '@/components/LoadState/LoadStatus'
 
 const columnHelper = createColumnHelper()
 
@@ -139,7 +140,7 @@ function DetailDivisi() {
     []
   )
 
-  const { data, isLoading, isPending } = useQuery({
+  const { data, isLoading, isPending, error } = useQuery({
     queryKey: ['detail-divisi', divisiId],
     queryFn: async () => {
       const req = await fetch(`/api/v1/proker/divisi/${divisiId}`)
@@ -162,18 +163,11 @@ function DetailDivisi() {
   })
 
   if (isLoading || isPending) {
-    return (
-      <div className="px-4 py-8">
-        <div className="flex items-center justify-center min-h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">
-              Memuat data divisi...
-            </p>
-          </div>
-        </div>
-      </div>
-    )
+    return <LoadingState />
+  }
+
+  if (error) {
+    return <ErrorState error={error} />
   }
 
   return (

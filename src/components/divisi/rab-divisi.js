@@ -25,6 +25,7 @@ import {
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Button } from '../ui/button'
+import { LoadingState, ErrorState } from '../LoadState/LoadStatus'
 
 const CreateRab = () => {
   const { orgId } = useAuth()
@@ -196,19 +197,11 @@ const CreateRab = () => {
     }, 0) || 0
 
   if (isLoading || isPending) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <div>Loading...</div>
-      </div>
-    )
+    return <LoadingState />
   }
 
   if (error) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <div className="text-red-500">Error: {error.message}</div>
-      </div>
-    )
+    return <ErrorState error={error} />
   }
 
   return (
