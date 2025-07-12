@@ -1,0 +1,186 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum TASK_STATUS {
+  TODO
+  INPROGRESS
+  REVIEW
+  DONE
+}
+
+enum TASK_PRIORITY {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum JENIS_ANGGOTA_DIVISI {
+  KORDINATOR
+  SEKERTARIS
+  STAFF
+}
+
+model User {
+  id            String    @id @unique
+  clerkId       String    @unique
+  username      String?
+  npm           String?
+  email         String    @unique
+  firstName     String?
+  lastName      String?
+  universitas   String?
+  alamat        String?
+  telpon        String?
+  tanggal_lahir DateTime? @db.Date
+  jenis_kelamin String?
+  profileImg    String?   @db.Text
+  bio           String?   @db.Text
+  label         String?
+
+  anggotaDivisi     AnggotaDivisi[]
+  organisasi_member Organisasi_member[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Proker {
+  id          String      @id @default(uuid())
+  org_id      String
+  title       String      @map("proker_name")
+  author      String      @map("proker_author")
+  description String      @map("proker_desc") @db.Text
+  divisi      Divisi[]
+  start       DateTime    @map("proker_start")
+  end         DateTime?   @map("proker_end")
+  created_at  DateTime    @default(now()) @map("created_at")
+  tugas       Tugas[]
+  rab         rab[]
+  notulensi   notulensi[]
+
+  @@map("program_kerja")
+}
+
+model Organisasi {
+  id         String @id @unique
+  name       String
+  slug       String
+  created_by String
+  image_url  String @db.Text
+
+  organisasi_member Organisasi_member[]
+
+  created_at DateTime    @default(now()) @map("created_at")
+  updated_at DateTime?   @updatedAt @map("updated_at")
+  notulensi  notulensi[]
+  rab        rab[]
+}
+
+model Organisasi_member {
+  id           String @id @default(uuid())
+  organisasiId String
+  clerkMemId   String @unique
+  memberId     String @unique
+  role         String
+
+  user       User?       @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  organisasi Organisasi? @relation(fields: [organisasiId], references: [id], onDelete: Cascade)
+
+  created_at DateTime  @default(now()) @map("created_at")
+  updated_at DateTime? @updatedAt @map("updated_at")
+}
+
+model Divisi {
+  id          String          @id @default(uuid())
+  proker_id   String          @map("proker_id")
+  org_id      String          @map("divisi_org_id")
+  name        String          @map("divisi_name")
+  description String          @map("divisi_desc") @db.Text
+  anggota     AnggotaDivisi[]
+  created_at  DateTime        @default(now()) @map("created_at")
+  updated_at  DateTime?       @updatedAt @map("updated_at")
+
+  proker      Proker      @relation(fields: [proker_id], references: [id], onDelete: Cascade)
+  tugasDivisi Tugas[]
+  rab         rab[]
+  notulensi   notulensi[]
+
+  @@map("proker_divisi")
+}
+
+model AnggotaDivisi {
+  id            String               @id @unique @default(uuid())
+  divisi_id     String               @map("divisi_id")
+  user_id       String
+  jenis_jabatan JENIS_ANGGOTA_DIVISI @default(value: STAFF) @map("anggota_jabatan")
+  tugasAnggota  Tugas[]
+
+  divisi     Divisi   @relation(fields: [divisi_id], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now()) @map("created_at")
+
+  @@map("anggota_divisi")
+}
+
+model Tugas {
+  id          String          @id @unique @default(uuid())
+  divisiId    String?
+  prokerId    String?
+  name        String          @map("tugas_name")
+  priority    TASK_PRIORITY
+  description String          @map("tugas_description")
+  status      TASK_STATUS     @map("tugas_status")
+  start       DateTime?
+  end         DateTime?
+  order       Int
+  assignedTo  AnggotaDivisi[]
+
+  proker Proker? @relation(fields: [prokerId], references: [id], onDelete: Cascade)
+  divisi Divisi? @relation(fields: [divisiId], references: [id], onDelete: Cascade)
+}
+
+model rab {
+  id       String  @id @unique @default(uuid())
+  orgId    String?
+  divisiId String?
+  prokerId String?
+  nama     String
+  harga    String
+  jumlah   String
+  satuan   String
+
+  divisi     Divisi?     @relation(fields: [divisiId], references: [id], onDelete: Cascade)
+  proker     Proker?     @relation(fields: [prokerId], references: [id], onDelete: Cascade)
+  organisasi Organisasi? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
+
+model notulensi {
+  id        String    @id @unique @default(uuid())
+  divisiId  String?
+  org_id    String?
+  prokerId  String?
+  title     String?
+  date      DateTime? @db.Date
+  time      DateTime? @db.Time
+  location  String?
+  agenda    String?
+  attendees String?
+  content   String?   @db.Text
+
+  divisi     Divisi?     @relation(fields: [divisiId], references: [id], onDelete: Cascade)
+  organisasi Organisasi? @relation(fields: [org_id], references: [id], onDelete: Cascade)
+  proker     Proker?     @relation(fields: [prokerId], references: [id], onDelete: Cascade)
+}
