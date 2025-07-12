@@ -100,7 +100,7 @@ const NotulensiList = () => {
             <div className="flex items-center justify-center gap-2 mt-4">
               <User className="w-5 h-5" />
               <span className="text-sm">
-                Author: {data[0]?.proker?.author || 'Tidak diketahui'}
+                Ketua Pelaksana : {data[0]?.proker?.author || 'Tidak diketahui'}
               </span>
             </div>
             {data[0]?.proker?.description && (
