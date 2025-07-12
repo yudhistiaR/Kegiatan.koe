@@ -17,7 +17,7 @@ export async function GET(_, segmenData) {
   const params = await segmenData.params
   const divisi_id = params.divisi_id
 
-  return tugasController.GET(divisi_id)
+  return tugasController.GETBYDIVISIID(divisi_id)
 }
 
 export async function POST(req) {

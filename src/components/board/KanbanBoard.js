@@ -23,11 +23,7 @@ import { useAuth } from '@clerk/nextjs'
 //components
 import { toast } from 'sonner'
 import CreatedTaskDialog from './CreatedTaskDialog'
-import {
-  LoadingState,
-  ErrorState,
-  NotDataState
-} from '@/components/LoadState/LoadStatus'
+import { LoadingState, ErrorState } from '@/components/LoadState/LoadStatus'
 
 //Kanban-components
 import DraggableItem from './DraggableItem'
@@ -381,10 +377,6 @@ export default function KanbanBoard({
 
   if (error) {
     return <ErrorState error={error} />
-  }
-
-  if (!data) {
-    return <NotDataState />
   }
 
   return (

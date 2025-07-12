@@ -9,9 +9,18 @@ export class TugasController {
     this.schema = schema
   }
 
-  async GET(divisi_id, proker_id) {
+  async GET(prokerId) {
     try {
-      const res = await this.tugasService.GET(divisi_id, proker_id)
+      const res = await this.tugasService.GET(prokerId)
+      return NextResponse.json(res, { status: 200 })
+    } catch (error) {
+      return ReponseError(error)
+    }
+  }
+
+  async GETBYDIVISIID(divisiId) {
+    try {
+      const res = await this.tugasService.GET_BY_ID(divisiId)
       return NextResponse.json(res, { status: 200 })
     } catch (error) {
       return ReponseError(error)

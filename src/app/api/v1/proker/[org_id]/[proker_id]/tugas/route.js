@@ -15,10 +15,9 @@ const tugasController = new TugasController(
 
 export async function GET(_, segmentData) {
   const params = await segmentData.params
-  const org_id = params.org_id
   const proker_id = params.proker_id
 
-  return tugasController.GET(org_id, proker_id)
+  return tugasController.GET(proker_id)
 }
 
 export async function POST(req) {

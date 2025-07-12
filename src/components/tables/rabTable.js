@@ -51,20 +51,8 @@ export default function RABTable() {
       const response = await req.json()
       return Array.isArray(response) ? response : response.data || []
     },
-    enabled: !orgId | !prokerId,
     select: groupByDivision
   })
-
-  //LoadStatus
-  if (isLoading | isPending) {
-    return <LoadingState />
-  }
-  if (error) {
-    return <ErrorState error={error} />
-  }
-  if (!rabProker | !Array.isArray(rabProker) | (rabProker.length === 0)) {
-    return <NotDataState />
-  }
 
   // Pastikan data sudah tersedia sebelum digunakan
   const groupedData = rabProker || {}
@@ -128,6 +116,14 @@ export default function RABTable() {
       columns,
       getCoreRowModel: getCoreRowModel()
     })
+
+    //LoadStatus
+    if (isLoading | isPending) {
+      return <LoadingState />
+    }
+    if (error) {
+      return <ErrorState error={error} />
+    }
 
     return (
       <div className="rounded-lg shadow-lg border border-gray-200">

@@ -3,54 +3,10 @@ export class TugasService {
     this.prisma = prisma
   }
 
-  async GET(divisi_id) {
-    if (!divisi_id) {
-      return await this.prisma.tugas.findMany({
-        orderBy: [{ status: 'asc' }, { order: 'asc' }, { name: 'asc' }],
-        select: {
-          id: true,
-          divisiId: true,
-          name: true,
-          priority: true,
-          description: true,
-          status: true,
-          order: true,
-          start: true,
-          end: true,
-          divisi: {
-            select: {
-              id: true,
-              name: true,
-              description: true
-            }
-          },
-          assignedTo: {
-            select: {
-              id: true,
-              jenis_jabatan: true,
-              user: {
-                select: {
-                  id: true,
-                  npm: true,
-                  email: true,
-                  telpon: true,
-                  username: true,
-                  profileImg: true,
-                  universitas: true,
-                  jenis_kelamin: true,
-                  firstName: true,
-                  lastName: true
-                }
-              }
-            }
-          }
-        }
-      })
-    }
-
+  async GET(proker_id) {
     return await this.prisma.tugas.findMany({
       where: {
-        divisiId: divisi_id
+        prokerId: proker_id
       },
       orderBy: [{ status: 'asc' }, { order: 'asc' }, { name: 'asc' }],
       select: {
@@ -95,9 +51,19 @@ export class TugasService {
   }
 
   async GET_BY_ID(id) {
-    return await this.prisma.tugas.findUnique({
-      where: { id },
-      include: {
+    return await this.prisma.tugas.findMany({
+      where: { divisiId: id },
+      orderBy: [{ status: 'asc' }, { order: 'asc' }, { name: 'asc' }],
+      select: {
+        id: true,
+        divisiId: true,
+        name: true,
+        priority: true,
+        description: true,
+        status: true,
+        order: true,
+        start: true,
+        end: true,
         divisi: {
           select: {
             id: true,
@@ -106,7 +72,9 @@ export class TugasService {
           }
         },
         assignedTo: {
-          include: {
+          select: {
+            id: true,
+            jenis_jabatan: true,
             user: {
               select: {
                 id: true,
