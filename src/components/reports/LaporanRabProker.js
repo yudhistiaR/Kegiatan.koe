@@ -8,7 +8,7 @@ import DataTable from '@/components/ui/DataTable'
 const LaporanRabProker = () => {
   const { orgId } = useAuth()
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['laporan-rab-proker', orgId],
     queryFn: async () => {
       const response = await fetch(`/api/v1/laporan/rab/${orgId}`)
@@ -60,31 +60,33 @@ const LaporanRabProker = () => {
       {
         accessorKey: 'harga',
         header: 'Harga Satuan',
-        cell: ({ getValue }) => `Rp ${parseFloat(getValue()).toLocaleString('id-ID')}`
+        cell: ({ getValue }) =>
+          `Rp ${parseFloat(getValue()).toLocaleString('id-ID')}`
       },
       {
         accessorKey: 'totalHargaItem',
         header: 'Total Harga',
-        cell: ({ getValue }) => `Rp ${parseFloat(getValue()).toLocaleString('id-ID')}`
+        cell: ({ getValue }) =>
+          `Rp ${parseFloat(getValue()).toLocaleString('id-ID')}`
       }
     ],
     []
   )
 
-  const allProkerTitles = useMemo(() => {
-    const titles = prokerList?.map(p => p.title) || []
-    return ['all', ...new Set(titles)]
-  }, [prokerList])
-
-  if (isLoadingRab || isLoadingProker) return <p>Loading...</p>
+  if (isLoading || isLoadingProker) return <p>Loading...</p>
   if (errorRab) return <p>Error: {errorRab.message}</p>
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Laporan Anggaran (RAB) per Program Kerja</h2>
+      <h2 className="text-2xl font-bold">
+        Laporan Anggaran (RAB) per Program Kerja
+      </h2>
       {Object.entries(groupedData).length > 0 ? (
         Object.entries(groupedData).map(([prokerTitle, prokerData]) => (
-          <div key={prokerTitle} className="rounded-lg overflow-hidden border border-border mb-8">
+          <div
+            key={prokerTitle}
+            className="rounded-lg overflow-hidden border border-border mb-8"
+          >
             <h3 className="text-lg font-semibold p-4 bg-muted/50 border-b border-border">
               {prokerTitle}
             </h3>
@@ -95,7 +97,8 @@ const LaporanRabProker = () => {
               enableGlobalFilter={false}
             />
             <div className="p-4 bg-muted/50 border-t border-border text-right font-bold">
-              Total Anggaran Proker: Rp {prokerData.totalAnggaran.toLocaleString('id-ID')}
+              Total Anggaran Proker: Rp{' '}
+              {prokerData.totalAnggaran.toLocaleString('id-ID')}
             </div>
           </div>
         ))

@@ -133,6 +133,9 @@ const NotulensApp = () => {
     }
   })
 
+  // Destructure values from mutation to avoid unstable deps
+  const { mutate: mutateFn, isPending: mutationIsPending } = mutation
+
   // Function untuk save manual
   const handleManualSave = useCallback(() => {
     if (!hasUnsavedChanges) {
@@ -147,8 +150,8 @@ const NotulensApp = () => {
     }
 
     setSaveStatus('saving')
-    mutation.mutate(meetingData)
-  }, [meetingData, hasUnsavedChanges, mutation])
+    mutateFn(meetingData)
+  }, [meetingData, hasUnsavedChanges, mutateFn])
 
   // Function untuk save ke localStorage saja (untuk persist saat refresh)
   const saveToLocalStorage = useCallback(
@@ -403,7 +406,7 @@ const NotulensApp = () => {
               </div>
               <Button
                 onClick={handleManualSave}
-                disabled={mutation.isPending || !hasUnsavedChanges}
+                disabled={mutationIsPending || !hasUnsavedChanges}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                   hasUnsavedChanges
                     ? 'bg-accentColor text-white hover:bg-accentColor/80'
@@ -411,7 +414,7 @@ const NotulensApp = () => {
                 }`}
               >
                 <Save className="w-4 h-4" />
-                {mutation.isPending ? 'Menyimpan...' : 'Simpan'}
+                {mutationIsPending ? 'Menyimpan...' : 'Simpan'}
               </Button>
               <Button
                 onClick={exportToPdf}
@@ -627,7 +630,7 @@ const NotulensApp = () => {
                   • Data akan tersimpan secara lokal saat Anda mengetik untuk
                   mencegah kehilangan data
                 </li>
-                <li>• Klik tombol "Simpan" untuk menyimpan ke server</li>
+                <li>{`• Klik tombol "Simpan" untuk menyimpan ke server`}</li>
                 <li>
                   • Gunakan heading untuk membagi bagian (Agenda, Pembahasan,
                   Keputusan, dll)
@@ -636,7 +639,6 @@ const NotulensApp = () => {
                   • Gunakan bullet points untuk mencatat poin-poin penting
                 </li>
                 <li>• Data akan tetap ada meskipun halaman di-refresh</li>
-                <li>{`• Klik "Export PDF" untuk mengunduh notulensi`}</li>
               </ul>
             </div>
           </div>

@@ -23,7 +23,7 @@ import { useAuth } from '@clerk/nextjs'
 //components
 import { toast } from 'sonner'
 import CreatedTaskDialog from './CreatedTaskDialog'
-import { LoadingState, ErrorState } from '@/components/LoadState/LoadStatus'
+import { ErrorState } from '@/components/LoadState/LoadStatus'
 
 //Kanban-components
 import DraggableItem from './DraggableItem'
@@ -112,13 +112,8 @@ export default function KanbanBoard({
     return { fetchUrl, updateUrl, batchUpdateUrl, queryKey }
   }, [scope, divisiId, prokerId, orgId, config])
 
-  const {
-    data: rawData,
-    isLoading,
-    isPending,
-    error
-  } = useQuery({
-    queryKey: apiUrls.queryKey,
+  const { data: rawData, error } = useQuery({
+    queryKey: [...apiUrls.queryKey, apiUrls.fetchUrl],
     queryFn: async () => {
       const req = await fetch(apiUrls.fetchUrl)
       if (!req.ok) {
@@ -153,7 +148,7 @@ export default function KanbanBoard({
     }
   }, [rawData])
 
-  const updateTaskMutation = useMutation({
+  const { mutate: updateTask } = useMutation({
     mutationFn: async updatedTask => {
       const response = await fetch(apiUrls.updateUrl, {
         method: 'PUT',
@@ -183,7 +178,7 @@ export default function KanbanBoard({
     }
   })
 
-  const batchUpdateTasksMutation = useMutation({
+  const { mutate: batchUpdateTasks } = useMutation({
     mutationFn: async updatedTasks => {
       const response = await fetch(apiUrls.batchUpdateUrl, {
         method: 'PUT',
@@ -373,15 +368,16 @@ export default function KanbanBoard({
             .map(task => ({ ...task, order: task.order + 1 }))
         ]
 
-        batchUpdateTasksMutation.mutate(tasksToUpdate)
+        updateTask(updatedTask)
+        batchUpdateTasks(tasksToUpdate)
       }
     },
     [
       enableDragAndDrop,
       columns,
       findColumnKeyByTaskId,
-      updateTaskMutation,
-      batchUpdateTasksMutation
+      updateTask,
+      batchUpdateTasks
     ]
   )
 

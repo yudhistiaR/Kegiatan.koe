@@ -11,7 +11,7 @@ import {
   flexRender,
   createColumnHelper
 } from '@tanstack/react-table'
-import { LoadingState, NotDataState, ErrorState } from '../LoadState/LoadStatus'
+import { LoadingState, ErrorState } from '../LoadState/LoadStatus'
 
 export default function RABTable() {
   const { orgId } = useAuth()
@@ -55,7 +55,7 @@ export default function RABTable() {
   })
 
   // Pastikan data sudah tersedia sebelum digunakan
-  const groupedData = rabProker || {}
+  const groupedData = useMemo(() => rabProker || {}, [rabProker])
 
   // Hitung grand total dari grouped data
   const grandTotal = useMemo(() => {
@@ -79,7 +79,7 @@ export default function RABTable() {
   // Definisi kolom untuk TanStack Table
   const columns = useMemo(
     () => [
-      columnHelper.accessor((row, index) => index + 1, {
+      columnHelper.accessor((_, index) => index + 1, {
         id: 'no',
         header: 'No',
         cell: info => info.getValue(),
@@ -182,7 +182,7 @@ export default function RABTable() {
 
               {/* Body */}
               <tbody className="divide-y divide-gray-100">
-                {table.getRowModel().rows.map((row, index) => (
+                {table.getRowModel().rows.map(row => (
                   <tr
                     key={row.id}
                     className={`hover:bg-accentColor transition-colors duration-150`}

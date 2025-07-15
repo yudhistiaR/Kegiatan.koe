@@ -1,5 +1,3 @@
-import { Children } from 'react'
-
 export class MeService {
   constructor(prisma) {
     this.prisma = prisma

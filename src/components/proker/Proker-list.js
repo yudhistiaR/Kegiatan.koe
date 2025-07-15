@@ -4,7 +4,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@clerk/nextjs'
 import { formatDate } from '@/helpers/formatedate'
-import { notFound } from 'next/navigation'
 
 //componets
 import { CardLoading } from '../CardLoading'

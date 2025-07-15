@@ -11,8 +11,7 @@ import {
   MapPin,
   Users,
   FileText,
-  User,
-  AlertCircle
+  User
 } from 'lucide-react'
 import DOMPurify from 'dompurify'
 import {
@@ -20,6 +19,7 @@ import {
   NotDataState,
   ErrorState
 } from '@/components/LoadState/LoadStatus'
+import { converDateTime } from '@/lib/utils'
 
 const NotulensiList = () => {
   const { orgId } = useAuth()
@@ -75,17 +75,6 @@ const NotulensiList = () => {
     }))
   }
 
-  const formatDate = dateString => {
-    try {
-      return new Date(dateString).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      })
-    } catch (error) {
-      return 'Tanggal tidak valid'
-    }
-  }
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-6xl mx-auto">
@@ -162,7 +151,7 @@ const NotulensiList = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                           <div className="flex items-center gap-2 text-sm">
                             <Calendar className="w-4 h-4" />
-                            <span>{formatDate(notulen.date)}</span>
+                            <span>{converDateTime(notulen.date)}</span>
                           </div>
 
                           {notulen.location && (

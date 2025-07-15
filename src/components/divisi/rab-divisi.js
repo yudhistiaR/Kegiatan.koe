@@ -11,7 +11,7 @@ import {
   getPaginationRowModel,
   useReactTable
 } from '@tanstack/react-table'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +42,28 @@ const CreateRab = () => {
 
   // Create column helper
   const columnHelper = createColumnHelper()
+
+  const { mutate: deleteMutation } = useMutation({
+    mutationFn: async itemId => {
+      const response = await fetch(
+        `/api/v1/proker/divisi/${divisiId}/rab/${itemId}`,
+        {
+          method: 'DELETE'
+        }
+      )
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['rab-proker', divisiId])
+    }
+  })
+
+  const handleDelete = useCallback(
+    itemId => {
+      deleteMutation(itemId)
+    },
+    [deleteMutation]
+  )
 
   const columns = useMemo(
     () => [
@@ -108,7 +130,7 @@ const CreateRab = () => {
         )
       })
     ],
-    []
+    [columnHelper, handleDelete]
   )
 
   const {
@@ -125,7 +147,7 @@ const CreateRab = () => {
     }
   })
 
-  const addMutation = useMutation({
+  const { mutate: addMutation } = useMutation({
     mutationFn: async newItem => {
       const response = await fetch(`/api/v1/proker/divisi/${divisiId}/rab`, {
         method: 'POST',
@@ -142,21 +164,6 @@ const CreateRab = () => {
       setHarga('')
       setJumlah('')
       setSatuan('')
-    }
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: async itemId => {
-      const response = await fetch(
-        `/api/v1/proker/divisi/${divisiId}/rab/${itemId}`,
-        {
-          method: 'DELETE'
-        }
-      )
-      return response.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['rab-proker', divisiId])
     }
   })
 
@@ -183,10 +190,6 @@ const CreateRab = () => {
         satuan
       })
     }
-  }
-
-  const handleDelete = itemId => {
-    deleteMutation.mutate(itemId)
   }
 
   const totalAnggaran =

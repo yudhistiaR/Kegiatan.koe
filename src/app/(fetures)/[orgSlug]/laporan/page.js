@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Printer } from 'lucide-react'
 import LaporanAnggota from '@/components/reports/LaporanAnggota'
 import LaporanProker from '@/components/reports/LaporanProker'
@@ -19,26 +18,6 @@ import LaporanTugasPerAnggota from '@/components/reports/LaporanTugasPerAnggota'
 import LaporanNotulensi from '@/components/reports/LaporanNotulensi'
 import LaporanKinerjaDivisi from '@/components/reports/LaporanKinerjaDivisi'
 import LaporanStrukturKepanitiaan from '@/components/reports/LaporanStrukturKepanitiaan'
-
-// --- Placeholder Components & Data ---
-// Di dunia nyata, ini akan mengambil data dari API Anda.
-
-const ReportSkeleton = () => (
-  <div className="space-y-4">
-    <div className="space-y-2">
-      <Skeleton className="h-6 w-1/3" />
-      <Skeleton className="h-4 w-2/3" />
-    </div>
-    <div className="space-y-3">
-      <Skeleton className="h-8 w-full" />
-      <div className="space-y-2">
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-6 w-full" />
-        <Skeleton className="h-6 w-5/6" />
-      </div>
-    </div>
-  </div>
-)
 
 const reportList = [
   {

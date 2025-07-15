@@ -14,8 +14,7 @@ import {
   CheckSquare,
   FileText,
   Receipt,
-  Clock,
-  Loader2
+  Clock
 } from 'lucide-react'
 import { converDateTime, formatCurrency } from '@/lib/utils'
 import {
@@ -76,7 +75,7 @@ const DetailProkerMockup = ({ orgId, prokerId }) => {
         }
       })
     ],
-    []
+    [columnHelper]
   )
 
   const rabTable = useReactTable({
@@ -97,7 +96,7 @@ const DetailProkerMockup = ({ orgId, prokerId }) => {
         cell: info => <div>{info.getValue()}</div>
       })
     ],
-    []
+    [columnHelper]
   )
 
   const divisiTable = useReactTable({
