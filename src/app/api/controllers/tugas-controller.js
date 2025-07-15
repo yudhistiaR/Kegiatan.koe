@@ -55,7 +55,6 @@ export class TugasController {
     const data = await req.json()
 
     try {
-      console.log(data)
       const res = await this.tugasService.UPDATE(data)
 
       return NextResponse.json(res, { status: 200 })

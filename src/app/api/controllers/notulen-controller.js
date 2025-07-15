@@ -11,7 +11,6 @@ export class NotulenController {
 
   async CREATE(data) {
     const body = await data.json()
-    console.log('from notulen control : ', body)
 
     try {
       const data = await this.service.CREATE(body)

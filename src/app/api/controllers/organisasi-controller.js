@@ -12,7 +12,6 @@ export class OrganisasiController {
   async getOrganisasiMembers(org_id) {
     const { orgId } = await this.clerk()
 
-    console.log(orgId, org_id)
     try {
       if (orgId !== org_id)
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })

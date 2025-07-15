@@ -21,7 +21,6 @@ export class RabController {
   async GET(id) {
     try {
       const data = await this.rabService.GET(id)
-      console.log(data)
       return NextResponse.json(data, { status: 200 })
     } catch (error) {
       return ReponseError(error)
