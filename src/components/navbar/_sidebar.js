@@ -50,7 +50,7 @@ const menu = [
     icon: <Target />
   },
   {
-    path: 'tugas',
+    path: 'me/tugas',
     name: 'Tugas',
     icon: <Logs />
   },

@@ -4,15 +4,11 @@ export class ProkerService {
   }
 
   async GET(orgId) {
-    if (orgId) {
-      return await this.prisma.proker.findMany({
-        where: {
-          org_id: orgId
-        }
-      })
-    }
-
-    return []
+    return await this.prisma.proker.findMany({
+      where: {
+        org_id: orgId
+      }
+    })
   }
 
   async GET_WITH_DIVISIONS_AND_MEMBERS(orgId) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -40,6 +40,13 @@ const dropAnimation = {
 }
 
 const defaultApiConfig = {
+  me: {
+    fetchUrl: (_, prokerId) => `/api/v1/me/tugas/${prokerId}`,
+    updateUrl: (orgId, prokerId) => `/api/v1/proker/${orgId}/${prokerId}/tugas`,
+    batchUpdateUrl: (orgId, prokerId) =>
+      `/api/v1/proker/${orgId}/${prokerId}/tugas/batch`,
+    queryKey: (orgId, prokerId) => ['me-tugas', 'me', orgId, prokerId]
+  },
   divisi: {
     fetchUrl: divisiId => `/api/v1/proker/divisi/${divisiId}/tugas`,
     updateUrl: divisiId => `/api/v1/proker/divisi/${divisiId}/tugas`,
@@ -50,23 +57,13 @@ const defaultApiConfig = {
     fetchUrl: (orgId, prokerId) => `/api/v1/proker/${orgId}/${prokerId}/tugas`,
     updateUrl: (orgId, prokerId) => `/api/v1/proker/${orgId}/${prokerId}/tugas`,
     batchUpdateUrl: (orgId, prokerId) =>
-      `/api/v1/proker/${orgId}/${prokerId}/tugas`,
+      `/api/v1/proker/${orgId}/${prokerId}/tugas/batch`,
     queryKey: (orgId, prokerId) => ['tugas', 'all', orgId, prokerId]
   }
 }
 
 /**
  * Reusable KanbanBoard Component
- *
- * @param {Object} props
- * @param {'divisi'|'all'} props.scope - Scope of tasks to display
- * @param {string} props.divisiId - Required when scope is 'divisi'
- * @param {string} props.prokerId - Required when scope is 'all'
- * @param {Object} props.apiConfig - Custom API configuration (optional)
- * @param {boolean} props.showCreateDialog - Show create task dialog (default: true)
- * @param {boolean} props.enableDragAndDrop - Enable drag and drop functionality (default: true)
- * @param {Function} props.onTaskUpdate - Callback when task is updated
- * @param {Function} props.onTasksReorder - Callback when tasks are reordered
  */
 export default function KanbanBoard({
   scope = 'divisi',
@@ -80,21 +77,7 @@ export default function KanbanBoard({
 }) {
   const { orgId } = useAuth()
   const queryClient = useQueryClient()
-
-  // Validate required props
-  if (scope === 'divisi' && !divisiId) {
-    throw new Error('divisiId is required when scope is "divisi"')
-  }
-
-  if (scope === 'all' && !prokerId) {
-    throw new Error('prokerId is required when scope is "all"')
-  }
-
-  // Get API configuration
   const config = apiConfig || defaultApiConfig[scope]
-  if (!config) {
-    throw new Error(`Invalid scope: ${scope}. Must be 'divisi' or 'all'`)
-  }
 
   const [columns, setColumns] = useState({
     TODO: [],
@@ -104,57 +87,75 @@ export default function KanbanBoard({
   })
   const [activeTask, setActiveTask] = useState(null)
 
-  const filterTasks = useCallback(tasks => {
-    const datas = {
-      TODO: [],
-      INPROGRESS: [],
-      REVIEW: [],
-      DONE: []
-    }
+  // Memoize URLs and query key to prevent recalculation
+  const apiUrls = useMemo(() => {
+    const fetchUrl =
+      scope === 'divisi'
+        ? config.fetchUrl(divisiId)
+        : config.fetchUrl(orgId, prokerId)
 
-    const sortedTasks = [...tasks].sort((a, b) => a.order - b.order)
+    const updateUrl =
+      scope === 'divisi'
+        ? config.updateUrl(divisiId)
+        : config.updateUrl(orgId, prokerId)
 
-    sortedTasks.forEach(task => {
-      datas[task.status].push(task)
-    })
+    const batchUpdateUrl =
+      scope === 'divisi'
+        ? config.batchUpdateUrl(divisiId)
+        : config.batchUpdateUrl(orgId, prokerId)
 
-    setColumns(datas)
-    return datas
-  }, [])
+    const queryKey =
+      scope === 'divisi'
+        ? config.queryKey(divisiId)
+        : config.queryKey(orgId, prokerId)
 
-  // Generate URLs and query key based on scope
-  const fetchUrl =
-    scope === 'divisi'
-      ? config.fetchUrl(divisiId)
-      : config.fetchUrl(orgId, prokerId)
-  const updateUrl =
-    scope === 'divisi'
-      ? config.updateUrl(divisiId)
-      : config.updateUrl(orgId, prokerId)
-  const batchUpdateUrl =
-    scope === 'divisi'
-      ? config.batchUpdateUrl(divisiId)
-      : config.batchUpdateUrl(orgId, prokerId)
-  const queryKey =
-    scope === 'divisi'
-      ? config.queryKey(divisiId)
-      : config.queryKey(orgId, prokerId)
+    return { fetchUrl, updateUrl, batchUpdateUrl, queryKey }
+  }, [scope, divisiId, prokerId, orgId, config])
 
-  const { data, isLoading, isPending, error } = useQuery({
-    queryKey: queryKey,
+  const {
+    data: rawData,
+    isLoading,
+    isPending,
+    error
+  } = useQuery({
+    queryKey: apiUrls.queryKey,
     queryFn: async () => {
-      const req = await fetch(fetchUrl)
+      const req = await fetch(apiUrls.fetchUrl)
       if (!req.ok) {
         throw new Error('Failed to fetch tasks')
       }
       return req.json()
     },
-    select: filterTasks
+    enabled: !!(scope === 'divisi' ? divisiId : prokerId) && !!orgId,
+    retry: 3,
+    retryDelay: 1000
   })
+
+  // Process data and update columns
+  useEffect(() => {
+    if (rawData && Array.isArray(rawData)) {
+      const processedData = {
+        TODO: [],
+        INPROGRESS: [],
+        REVIEW: [],
+        DONE: []
+      }
+
+      const sortedTasks = [...rawData].sort((a, b) => a.order - b.order)
+
+      sortedTasks.forEach(task => {
+        if (processedData[task.status]) {
+          processedData[task.status].push(task)
+        }
+      })
+
+      setColumns(processedData)
+    }
+  }, [rawData])
 
   const updateTaskMutation = useMutation({
     mutationFn: async updatedTask => {
-      const response = await fetch(updateUrl, {
+      const response = await fetch(apiUrls.updateUrl, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -170,9 +171,8 @@ export default function KanbanBoard({
     },
     onSuccess: (data, variables) => {
       toast.success('Tugas berhasil diubah')
-      queryClient.invalidateQueries({ queryKey })
+      queryClient.invalidateQueries({ queryKey: apiUrls.queryKey })
 
-      // Call custom callback if provided
       if (onTaskUpdate) {
         onTaskUpdate(variables, data)
       }
@@ -185,7 +185,7 @@ export default function KanbanBoard({
 
   const batchUpdateTasksMutation = useMutation({
     mutationFn: async updatedTasks => {
-      const response = await fetch(batchUpdateUrl, {
+      const response = await fetch(apiUrls.batchUpdateUrl, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -200,9 +200,8 @@ export default function KanbanBoard({
       return response.json()
     },
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey })
+      queryClient.invalidateQueries({ queryKey: apiUrls.queryKey })
 
-      // Call custom callback if provided
       if (onTasksReorder) {
         onTasksReorder(variables, data)
       }
@@ -213,16 +212,19 @@ export default function KanbanBoard({
     }
   })
 
-  const findColumnKeyByTaskId = id => {
-    return Object.keys(columns).find(key =>
-      columns[key].some(item => item.id === id)
-    )
-  }
+  const findColumnKeyByTaskId = useCallback(
+    id => {
+      return Object.keys(columns).find(key =>
+        columns[key].some(item => item.id === id)
+      )
+    },
+    [columns]
+  )
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
-        delay: 3000,
+        delay: 300,
         distance: 5
       }
     }),
@@ -234,141 +236,162 @@ export default function KanbanBoard({
     })
   )
 
-  const handleDragStart = event => {
-    if (!enableDragAndDrop) return
+  const handleDragStart = useCallback(
+    event => {
+      if (!enableDragAndDrop) return
 
-    const { active } = event
-    const task = Object.values(columns)
-      .flat()
-      .find(t => t.id === active.id)
+      const { active } = event
+      const task = Object.values(columns)
+        .flat()
+        .find(t => t.id === active.id)
 
-    if (task) {
-      setActiveTask(task)
-    }
-  }
+      if (task) {
+        setActiveTask(task)
+      }
+    },
+    [enableDragAndDrop, columns]
+  )
 
-  const handleDragEnd = event => {
-    if (!enableDragAndDrop) {
+  const handleDragEnd = useCallback(
+    event => {
+      if (!enableDragAndDrop) {
+        setActiveTask(null)
+        return
+      }
+
       setActiveTask(null)
-      return
-    }
+      const { active, over } = event
+      if (!over) return
 
-    setActiveTask(null)
-    const { active, over } = event
-    if (!over) return
+      if (over.id in columns) {
+        const sourceColumn = findColumnKeyByTaskId(active.id)
+        if (sourceColumn === over.id) return
 
-    if (over.id in columns) {
+        const activeItem = columns[sourceColumn].find(
+          item => item.id === active.id
+        )
+        const targetItems = columns[over.id]
+
+        setColumns(prev => {
+          const updatedSource = prev[sourceColumn].filter(
+            item => item.id !== active.id
+          )
+          const updatedTarget = [
+            ...prev[over.id],
+            { ...activeItem, status: over.id }
+          ]
+
+          return {
+            ...prev,
+            [sourceColumn]: updatedSource,
+            [over.id]: updatedTarget
+          }
+        })
+
+        const updatedTask = {
+          ...activeItem,
+          status: over.id,
+          order:
+            targetItems.length > 0
+              ? Math.max(...targetItems.map(item => item.order)) + 1
+              : 0
+        }
+
+        updateTaskMutation.mutate(updatedTask)
+        return
+      }
+
+      if (active.id === over.id) return
+
       const sourceColumn = findColumnKeyByTaskId(active.id)
-      if (sourceColumn === over.id) return
+      const targetColumn = findColumnKeyByTaskId(over.id)
 
-      const activeItem = columns[sourceColumn].find(
-        item => item.id === active.id
-      )
-      const targetItems = columns[over.id]
+      if (!sourceColumn || !targetColumn) return
 
-      setColumns(prev => {
-        const updatedSource = prev[sourceColumn].filter(
-          item => item.id !== active.id
+      if (sourceColumn === targetColumn) {
+        const oldIndex = columns[sourceColumn].findIndex(
+          item => item.id === active.id
         )
-        const updatedTarget = [
-          ...prev[over.id],
-          { ...activeItem, status: over.id }
-        ]
-
-        return {
-          ...prev,
-          [sourceColumn]: updatedSource,
-          [over.id]: updatedTarget
-        }
-      })
-
-      const updatedTask = {
-        ...activeItem,
-        status: over.id,
-        order:
-          targetItems.length > 0
-            ? Math.max(...targetItems.map(item => item.order)) + 1
-            : 0
-      }
-
-      updateTaskMutation.mutate(updatedTask)
-      return
-    }
-
-    if (active.id === over.id) return
-
-    const sourceColumn = findColumnKeyByTaskId(active.id)
-    const targetColumn = findColumnKeyByTaskId(over.id)
-
-    if (!sourceColumn || !targetColumn) return
-
-    if (sourceColumn === targetColumn) {
-      const oldIndex = columns[sourceColumn].findIndex(
-        item => item.id === active.id
-      )
-      const newIndex = columns[sourceColumn].findIndex(
-        item => item.id === over.id
-      )
-
-      const updatedItems = arrayMove(columns[sourceColumn], oldIndex, newIndex)
-
-      setColumns(prev => ({
-        ...prev,
-        [sourceColumn]: updatedItems
-      }))
-
-      const tasksToUpdate = updatedItems.map((task, index) => ({
-        ...task,
-        order: index
-      }))
-
-      batchUpdateTasksMutation.mutate(tasksToUpdate)
-    } else {
-      const activeItem = columns[sourceColumn].find(
-        item => item.id === active.id
-      )
-      const overItemIndex = columns[targetColumn].findIndex(
-        item => item.id === over.id
-      )
-
-      setColumns(prev => {
-        const updatedSource = prev[sourceColumn].filter(
-          item => item.id !== active.id
+        const newIndex = columns[sourceColumn].findIndex(
+          item => item.id === over.id
         )
 
-        const updatedTarget = [
-          ...prev[targetColumn].slice(0, overItemIndex),
-          { ...activeItem, status: targetColumn },
-          ...prev[targetColumn].slice(overItemIndex)
+        const updatedItems = arrayMove(
+          columns[sourceColumn],
+          oldIndex,
+          newIndex
+        )
+
+        setColumns(prev => ({
+          ...prev,
+          [sourceColumn]: updatedItems
+        }))
+
+        const tasksToUpdate = updatedItems.map((task, index) => ({
+          ...task,
+          order: index
+        }))
+
+        batchUpdateTasksMutation.mutate(tasksToUpdate)
+      } else {
+        const activeItem = columns[sourceColumn].find(
+          item => item.id === active.id
+        )
+        const overItemIndex = columns[targetColumn].findIndex(
+          item => item.id === over.id
+        )
+
+        setColumns(prev => {
+          const updatedSource = prev[sourceColumn].filter(
+            item => item.id !== active.id
+          )
+
+          const updatedTarget = [
+            ...prev[targetColumn].slice(0, overItemIndex),
+            { ...activeItem, status: targetColumn },
+            ...prev[targetColumn].slice(overItemIndex)
+          ]
+
+          return {
+            ...prev,
+            [sourceColumn]: updatedSource,
+            [targetColumn]: updatedTarget
+          }
+        })
+
+        const updatedTask = {
+          ...activeItem,
+          status: targetColumn,
+          order: overItemIndex
+        }
+
+        const targetTasks = columns[targetColumn]
+        const tasksToUpdate = [
+          updatedTask,
+          ...targetTasks
+            .filter(task => task.order >= overItemIndex)
+            .map(task => ({ ...task, order: task.order + 1 }))
         ]
 
-        return {
-          ...prev,
-          [sourceColumn]: updatedSource,
-          [targetColumn]: updatedTarget
-        }
-      })
-
-      const updatedTask = {
-        ...activeItem,
-        status: targetColumn,
-        order: overItemIndex
+        batchUpdateTasksMutation.mutate(tasksToUpdate)
       }
+    },
+    [
+      enableDragAndDrop,
+      columns,
+      findColumnKeyByTaskId,
+      updateTaskMutation,
+      batchUpdateTasksMutation
+    ]
+  )
 
-      const targetTasks = columns[targetColumn]
-      const tasksToUpdate = [
-        updatedTask,
-        ...targetTasks
-          .filter(task => task.order >= overItemIndex)
-          .map(task => ({ ...task, order: task.order + 1 }))
-      ]
-
-      batchUpdateTasksMutation.mutate(tasksToUpdate)
-    }
-  }
-
-  const handleDragCancel = () => {
+  const handleDragCancel = useCallback(() => {
     setActiveTask(null)
+  }, [])
+
+  // Get API configuration
+  if (!config) {
+    throw new Error(`Invalid scope: ${scope}. Must be 'divisi', 'all', or 'me'`)
   }
 
   if (isLoading || isPending) {
@@ -377,6 +400,24 @@ export default function KanbanBoard({
 
   if (error) {
     return <ErrorState error={error} />
+  }
+
+  // Early return jika prokerId tidak ada untuk scope 'me'
+  if (scope === 'me' && !prokerId) {
+    return (
+      <div className="flex items-center justify-center h-64 border-2 border-dashed border-gray-300 rounded-lg">
+        <p className="text-gray-500">Pilih Program Kerja terlebih dahulu</p>
+      </div>
+    )
+  }
+
+  // Validate required props
+  if (scope === 'divisi' && !divisiId) {
+    throw new Error('divisiId is required when scope is "divisi"')
+  }
+
+  if (scope === 'all' && !prokerId) {
+    throw new Error('prokerId is required when scope is "all"')
   }
 
   return (
@@ -391,7 +432,7 @@ export default function KanbanBoard({
         {showCreateDialog && (
           <CreatedTaskDialog divisiId={divisiId} scope={scope} />
         )}
-        <div className="grid grid-rows-2 grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {Object.entries(columns).map(([status, items]) => (
             <DroppableContainer
               key={status}
@@ -450,27 +491,27 @@ function DroppableContainer({ id, title, items, enableDragAndDrop = true }) {
           )}
         </h2>
         <div className="bg-accentColor text-white text-sm font-semibold px-2 py-1 rounded-full">
-          {items.length}
+          {items?.length || 0}
         </div>
       </div>
 
-      <div className="flex flex-col gap-1 overflow-y-auto min-h-[600px] max-h-[600px] p-2">
+      <div className="flex flex-col gap-1 overflow-y-auto min-h-[400px] max-h-[600px] p-2">
         <SortableContext
-          items={items.map(item => item.id)}
+          items={items?.map(item => item.id) || []}
           strategy={verticalListSortingStrategy}
           disabled={!enableDragAndDrop}
         >
-          {items.map(item => (
+          {items?.map(item => (
             <DraggableItem
               key={item.id}
               id={item.id}
               data={item}
-              disabled={enableDragAndDrop}
+              disabled={!enableDragAndDrop}
             />
           ))}
         </SortableContext>
 
-        {items.length === 0 && (
+        {(!items || items.length === 0) && (
           <div className="flex-1 flex items-center justify-center text-zinc-500 border-2 border-zinc-500 border-dashed rounded-md">
             <p>{enableDragAndDrop ? 'Drop task here' : 'No tasks'}</p>
           </div>

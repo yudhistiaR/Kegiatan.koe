@@ -43,4 +43,19 @@ export class MeController {
       return ReponseError(error)
     }
   }
+
+  async ME_TUGAS(prokerId) {
+    try {
+      const { userId } = this.clerk()
+
+      if (!userId)
+        NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+
+      const tugas = await this.service.ME_TUGAS(prokerId, userId)
+
+      return NextResponse.json(tugas, { status: 200 })
+    } catch (error) {
+      return ReponseError(error)
+    }
+  }
 }

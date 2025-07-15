@@ -55,8 +55,7 @@ export class TugasController {
     const data = await req.json()
 
     try {
-      //const validBody = this.validation.validate(this.schema.UPDATE, data)
-
+      console.log(data)
       const res = await this.tugasService.UPDATE(data)
 
       return NextResponse.json(res, { status: 200 })

@@ -39,6 +39,7 @@ export default function CustomSelect({ isMulti = false, ...props }) {
       margin: '0',
       padding: '0',
       fontSize: '1rem',
+      color: '#fff',
       '@media (min-width: 768px)': {
         fontSize: '0.875rem'
       }
