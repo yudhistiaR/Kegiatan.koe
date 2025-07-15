@@ -394,10 +394,6 @@ export default function KanbanBoard({
     throw new Error(`Invalid scope: ${scope}. Must be 'divisi', 'all', or 'me'`)
   }
 
-  if (isLoading || isPending) {
-    return <LoadingState />
-  }
-
   if (error) {
     return <ErrorState error={error} />
   }
