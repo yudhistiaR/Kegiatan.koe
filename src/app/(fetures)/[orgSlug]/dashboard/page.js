@@ -1,6 +1,29 @@
+'use client'
+import { useAuth } from '@clerk/nextjs'
+import { useQuery } from '@tanstack/react-query'
 import { BriefcaseBusiness, User, CircleCheckBig, SquareX } from 'lucide-react'
+import { LoadingState, ErrorState } from '@/components/LoadState/LoadStatus'
 
 const DashboardPage = () => {
+  const { orgId, isLoaded } = useAuth()
+
+  const { data, isLoading, isPending, error } = useQuery({
+    queryKey: ['statistik', orgId],
+    queryFn: async () => {
+      const req = await fetch(`/api/v1/organisasi/${orgId}/statistics`)
+      return req.json()
+    },
+    enabled: isLoaded
+  })
+
+  if (isPending | isLoading) {
+    return <LoadingState />
+  }
+
+  if (error) {
+    return <ErrorState error={error} />
+  }
+
   return (
     <div className="w-full max-h-screen space-y-5 flex flex-col">
       {/* List Counter */}
@@ -8,25 +31,25 @@ const DashboardPage = () => {
       <div className="grid grid-cols-4 grid-rows-1 gap-4">
         <CounterCard
           icon={<BriefcaseBusiness />}
-          counter="100"
+          counter={data.proker}
           title="Total Program Kerja"
           colors="bg-blue-100 text-blue-600"
         />
         <CounterCard
-          counter="3059"
+          counter={data.anggota}
           icon={<User />}
           title="Total Anggota"
           colors="bg-orange-100 text-orange-600"
         />
         <CounterCard
           icon={<CircleCheckBig />}
-          counter="359"
+          counter={data.tugasSelesai}
           title="Total Tugas Selesai"
           colors="bg-green-100 text-green-600"
         />
         <CounterCard
           icon={<SquareX />}
-          counter="359"
+          counter={data.tugasTidakSelesai}
           title="Total Tugas Tidak Selesai"
           colors="bg-red-100 text-red-600"
         />
