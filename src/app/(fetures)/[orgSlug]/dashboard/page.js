@@ -1,7 +1,15 @@
 'use client'
 import { useAuth } from '@clerk/nextjs'
 import { useQuery } from '@tanstack/react-query'
-import { BriefcaseBusiness, User, CircleCheckBig, SquareX } from 'lucide-react'
+import {
+  BriefcaseBusiness,
+  User,
+  CircleCheckBig,
+  SquareX,
+  CheckCircle,
+  AlertCircle,
+  Clock
+} from 'lucide-react'
 import { LoadingState, ErrorState } from '@/components/LoadState/LoadStatus'
 import Image from 'next/image'
 
@@ -55,20 +63,68 @@ const DashboardPage = () => {
           colors="bg-red-100 text-red-600"
         />
       </div>
+
       {/* List Kegiatan Terbaru */}
       <div className="h-full min-h-full flex gap-4 flex-3">
-        <div className="flex-4 border rounded-md p-4 flex flex-col gap-4">
-          <h1 className="text-md font-semibold">Informasi Tugas</h1>
-          <ul className="flex-1 overflow-y-auto h-[calc(100% - 80px)]">
-            {Array.from({ length: 0 }).map((_, i) => (
-              <li key={i}>Data {i}</li>
-            ))}
-          </ul>
-          <p className="text-sm text-zinc-500 italic">
-            *List tugas terbaru yang sudah diselesaikan
-          </p>
+        {/* Improved Task Table */}
+        <div className="flex-4 border rounded-lg shadow-sm p-6 flex flex-col gap-4">
+          <h1 className="text-lg font-semibold">Informasi Tugas</h1>
+          <div className="overflow-hidden">
+            <div className="overflow-y-auto max-h-[400px]">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-md">
+                      No
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                      Nama Tugas
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                      Prioritas
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider rounded-tr-md">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {data.infoTugasSelesai.map((item, index) => (
+                    <tr key={item.id}>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm">
+                        {String(index + 1).padStart(2, '0')}
+                      </td>
+                      <td className="px-4 py-4 text-sm">
+                        <div className="font-medium">{item.name}</div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-center">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getPriorityColor(item.priority)}`}
+                        >
+                          {item.priority}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <span className="text-sm">{item.status}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+            <p className="text-sm text-gray-500 italic flex items-center gap-1">
+              <CheckCircle className="w-4 h-4" />
+              List tugas terbaru yang sudah diselesaikan
+            </p>
+          </div>
         </div>
-        {/* List Ranking Anggora */}
+
+        {/* List Ranking Anggota */}
         <div className="h-full min-h-full flex gap-4 flex-2">
           <div className="flex-1 border rounded-lg p-4 flex flex-col gap-4 bg-gradient-to-br">
             <div className="flex items-center gap-2 mb-2">
@@ -102,8 +158,8 @@ const DashboardPage = () => {
                                   : '/medal/bronze.png'
                             }
                             width={28}
-                            height={28}
                             alt="medal"
+                            height={28}
                             className="drop-shadow-sm"
                           />
                         ) : (
@@ -153,6 +209,24 @@ const DashboardPage = () => {
       </div>
     </div>
   )
+}
+
+// Helper function untuk warna prioritas
+const getPriorityColor = priority => {
+  const priorityLower = priority?.toLowerCase() || ''
+  switch (priorityLower) {
+    case 'tinggi':
+    case 'high':
+      return 'bg-red-100 text-red-800 border-red-200'
+    case 'sedang':
+    case 'medium':
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    case 'rendah':
+    case 'low':
+      return 'bg-green-100 text-green-800 border-green-200'
+    default:
+      return 'bg-gray-100 text-gray-800 border-gray-200'
+  }
 }
 
 const CounterCard = ({ icon, counter, title, colors }) => {
