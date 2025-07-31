@@ -26,6 +26,11 @@ const LaporanNotulensi = () => {
   const columns = useMemo(
     () => [
       {
+        header: 'No',
+        cell: ({ row }) => row.index + 1,
+        size: 50
+      },
+      {
         accessorKey: 'title',
         header: 'Judul Rapat'
       },
@@ -38,11 +43,11 @@ const LaporanNotulensi = () => {
         accessorKey: 'time',
         header: 'Waktu',
         cell: ({ getValue }) => {
-          const time = getValue();
-          if (!time) return '-';
+          const time = getValue()
+          if (!time) return '-'
           // Assuming time is stored as a string like "HH:MM:SS"
           // You might need to adjust this based on your actual time format
-          return time.substring(0, 5); // Display HH:MM
+          return time.substring(0, 5) // Display HH:MM
         }
       },
       {
@@ -56,7 +61,11 @@ const LaporanNotulensi = () => {
       {
         accessorKey: 'content',
         header: 'Isi/Hasil Rapat',
-        cell: ({ getValue }) => <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getValue()) }} />
+        cell: ({ getValue }) => (
+          <div
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getValue()) }}
+          />
+        )
       },
       {
         accessorKey: 'attendees',
@@ -75,10 +84,13 @@ const LaporanNotulensi = () => {
       {data && data.length > 0 ? (
         <DataTable data={data} columns={columns} isLoading={isLoading} />
       ) : (
-        <p className="text-center text-muted-foreground">Tidak ada data notulensi rapat.</p>
+        <p className="text-center text-muted-foreground">
+          Tidak ada data notulensi rapat.
+        </p>
       )}
     </div>
   )
 }
 
 export default LaporanNotulensi
+

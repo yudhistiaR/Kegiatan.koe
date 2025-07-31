@@ -23,6 +23,11 @@ const LaporanKinerjaDivisi = () => {
   const columns = useMemo(
     () => [
       {
+        header: 'No',
+        cell: ({ row }) => row.index + 1,
+        size: 50
+      },
+      {
         accessorKey: 'name',
         header: 'Nama Divisi'
       },
@@ -41,7 +46,8 @@ const LaporanKinerjaDivisi = () => {
       {
         accessorKey: 'rabUsed',
         header: 'Anggaran yang Digunakan',
-        cell: ({ getValue }) => `Rp ${parseFloat(getValue()).toLocaleString('id-ID')}`
+        cell: ({ getValue }) =>
+          `Rp ${parseFloat(getValue()).toLocaleString('id-ID')}`
       }
     ],
     []
@@ -56,7 +62,9 @@ const LaporanKinerjaDivisi = () => {
       {data && data.length > 0 ? (
         <DataTable data={data} columns={columns} isLoading={isLoading} />
       ) : (
-        <p className="text-center text-muted-foreground">Tidak ada data kinerja divisi.</p>
+        <p className="text-center text-muted-foreground">
+          Tidak ada data kinerja divisi.
+        </p>
       )}
     </div>
   )

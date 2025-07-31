@@ -76,6 +76,11 @@ const LaporanProgresTugas = () => {
   const columns = useMemo(
     () => [
       {
+        header: 'No',
+        cell: ({ row }) => row.index + 1,
+        size: 50
+      },
+      {
         accessorKey: 'name',
         header: 'Nama Tugas'
       },
