@@ -61,7 +61,6 @@ export default function LaporanPage() {
     {
       id: 'notulensi',
       name: 'Laporan Notulensi Rapat',
-      url: '/laporan/notulensi',
       component: <LaporanNotulensi />
     },
     {
@@ -112,15 +111,17 @@ export default function LaporanPage() {
               ))}
             </SelectContent>
           </Select>
-          <Link
-            className={buttonVariants()}
-            href={currentReport?.url || '#'}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Printer className="mr-2 h-4 w-4" />
-            Cetak
-          </Link>
+          {currentReport?.url && (
+            <Link
+              className={buttonVariants()}
+              href={currentReport?.url || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Printer className="mr-2 h-4 w-4" />
+              Cetak
+            </Link>
+          )}
         </div>
       </div>
       <div className="p-6">
