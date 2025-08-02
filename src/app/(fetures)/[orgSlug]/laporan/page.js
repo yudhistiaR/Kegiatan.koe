@@ -91,6 +91,7 @@ export default function LaporanPage() {
     {
       id: 'struktur-kepanitiaan',
       name: 'Laporan Struktur Kepanitiaan',
+      url: '/laporan/kepanitiaan',
       component: <LaporanStrukturKepanitiaan />
     }
   ]
