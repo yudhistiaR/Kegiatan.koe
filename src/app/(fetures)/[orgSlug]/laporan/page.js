@@ -67,12 +67,9 @@ export default function LaporanPage() {
       )
     },
     {
-      // --- DIUBAH: Laporan Tugas per Anggota ---
       id: 'tugas-anggota',
       name: 'Laporan Tugas per Anggota',
-      // URL menjadi dinamis menunjuk ke API PDF, menyertakan memberId
       url: `/laporan/tugas-peranggota/?memberId=${tugasAnggotaFilter}`,
-      // State dan handler di-pass sebagai props
       component: (
         <LaporanTugasPerAnggota
           selectedMemberId={tugasAnggotaFilter}
@@ -88,6 +85,7 @@ export default function LaporanPage() {
     {
       id: 'kinerja-divisi',
       name: 'Laporan Kinerja Divisi',
+      url: '/laporan/kinerja-divisi',
       component: <LaporanKinerjaDivisi />
     },
     {
