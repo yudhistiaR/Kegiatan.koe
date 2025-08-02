@@ -180,7 +180,7 @@ const CreateRab = () => {
 
   const handleAdd = () => {
     if (nama && harga && jumlah && satuan) {
-      addMutation.mutate({
+      addMutation({
         divisiId: divisiId,
         prokerId: prokerId,
         orgId: orgId,
