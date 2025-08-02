@@ -8,6 +8,7 @@ import {
   renderToStream
 } from '@react-pdf/renderer'
 import { auth, createClerkClient } from '@clerk/nextjs/server'
+import { prisma } from '@/lib/prisma'
 
 const clerk = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY
@@ -22,10 +23,22 @@ const chunkArray = (array, chunkSize) => {
   return chunks
 }
 
+// Function to format date
+const formatDate = date => {
+  if (!date) return '-'
+  return new Date(date).toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+}
+
 // Component for page header
 const PageHeader = ({ orgName, pageNumber, totalPages }) => (
   <View style={styles.headerSection}>
-    <Text style={styles.title}>DAFTAR ANGGOTA</Text>
+    <Text style={styles.title}>
+      DAFTAR PROGRAM KERJA {new Date().getFullYear()}
+    </Text>
     <Text style={styles.subtitle}>
       {orgName?.toUpperCase() || 'ORGANISASI'}
     </Text>
@@ -44,21 +57,27 @@ const TableHeader = () => (
     <Text style={[styles.tableCell, styles.headerCell, styles.noColumn]}>
       NO
     </Text>
-    <Text style={[styles.tableCell, styles.headerCell, styles.emailColumn]}>
-      EMAIL
-    </Text>
     <Text style={[styles.tableCell, styles.headerCell, styles.namaColumn]}>
-      NAMA LENGKAP
+      NAMA PROGRAM
+    </Text>
+    <Text style={[styles.tableCell, styles.headerCell, styles.ketuaColumn]}>
+      KETUA PELAKSANA
+    </Text>
+    <Text style={[styles.tableCell, styles.headerCell, styles.deskripsiColumn]}>
+      DESKRIPSI
+    </Text>
+    <Text style={[styles.tableCell, styles.headerCell, styles.tanggalColumn]}>
+      TANGGAL
     </Text>
   </View>
 )
 
 // Component for page footer
-const PageFooter = ({ totalMembers, currentPageStart, currentPageEnd }) => (
+const PageFooter = ({ totalProker, currentPageStart, currentPageEnd }) => (
   <View style={styles.footer}>
     <Text style={styles.footerText}>
-      Menampilkan {currentPageStart}-{currentPageEnd} dari {totalMembers}{' '}
-      anggota
+      Menampilkan {currentPageStart}-{currentPageEnd} dari {totalProker} program
+      kerja
     </Text>
     <Text style={styles.footerDate}>
       Dicetak pada:{' '}
@@ -86,70 +105,48 @@ export async function GET(req, res) {
       organizationId: orgId
     })
 
-    // Get organization members with pagination support
-    let allMembers = []
-    let offset = 0
-    const limit = 100
-    let hasMore = true
-
-    // Fetch all members (handle pagination)
-    while (hasMore) {
-      try {
-        const { data, totalCount } =
-          await clerk.organizations.getOrganizationMembershipList({
-            organizationId: orgId,
-            limit: limit,
-            offset: offset
-          })
-
-        if (data && data.length > 0) {
-          allMembers = [...allMembers, ...data]
-          offset += limit
-          hasMore = data.length === limit && allMembers.length < totalCount
-        } else {
-          hasMore = false
-        }
-      } catch (error) {
-        console.error('Error fetching members:', error)
-        hasMore = false
+    // Fetch all program kerja from database
+    const listProgramKerja = await prisma.proker.findMany({
+      where: {
+        org_id: orgId
+      },
+      orderBy: {
+        start: 'asc'
       }
-    }
+    })
 
-    // Transform Clerk data to PDF format
-    const membersData = allMembers.map((membership, index) => ({
+    console.log(listProgramKerja)
+
+    // Transform Prisma data to PDF format
+    const prokerData = listProgramKerja.map((proker, index) => ({
       no: index + 1,
-      email:
-        membership.publicUserData?.identifier ||
-        membership.publicUserData?.emailAddress ||
-        'N/A',
-      nama: (() => {
-        const firstName = membership.publicUserData?.firstName || ''
-        const lastName = membership.publicUserData?.lastName || ''
-        const fullName = `${firstName} ${lastName}`.trim()
-
-        // If no name available, use email or identifier
-        if (!fullName) {
-          return (
-            membership.publicUserData?.identifier ||
-            membership.publicUserData?.emailAddress ||
-            'User'
-          )
+      nama: proker.title,
+      ketua: proker.author || '-',
+      deskripsi: proker.description,
+      tanggal: (() => {
+        if (proker.start && proker.end) {
+          const start = formatDate(proker.start)
+          const end = formatDate(proker.end)
+          return start === end ? start : `${start} - ${end}`
+        } else if (proker.start) {
+          return formatDate(proker.start)
+        } else if (proker.end) {
+          return formatDate(proker.start)
         }
-
-        return fullName
+        return '-'
       })(),
-      role: membership.role || 'member'
+      status: proker.status || 'Belum Terjadwal'
     }))
 
-    // Set items per page (100 as requested)
-    const itemsPerPage = 100
-    const dataChunks = chunkArray(membersData, itemsPerPage)
+    // Set items per page (20 for program kerja since it has more columns)
+    const itemsPerPage = 20 // Reduced for better readability with 5 columns
+    const dataChunks = chunkArray(prokerData, itemsPerPage)
     const totalPages = dataChunks.length
 
-    // If no members found
-    if (membersData.length === 0) {
+    // If no program kerja found
+    if (prokerData.length === 0) {
       return NextResponse.json(
-        { error: 'No members found in organization' },
+        { error: 'No program kerja found in organization' },
         { status: 404 }
       )
     }
@@ -172,7 +169,7 @@ export async function GET(req, res) {
               <TableHeader />
 
               {/* Table Data for current page */}
-              {pageData.map((member, index) => {
+              {pageData.map((proker, index) => {
                 const globalIndex = pageIndex * itemsPerPage + index + 1
                 return (
                   <View
@@ -192,19 +189,37 @@ export async function GET(req, res) {
                       style={[
                         styles.tableCell,
                         styles.dataCell,
-                        styles.emailColumn
+                        styles.namaColumn
                       ]}
                     >
-                      {member.email}
+                      {proker.nama}
                     </Text>
                     <Text
                       style={[
                         styles.tableCell,
                         styles.dataCell,
-                        styles.namaColumn
+                        styles.ketuaColumn
                       ]}
                     >
-                      {member.nama}
+                      {proker.ketua}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.tableCell,
+                        styles.dataCell,
+                        styles.deskripsiColumn
+                      ]}
+                    >
+                      {proker.deskripsi}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.tableCell,
+                        styles.dataCell,
+                        styles.tanggalColumn
+                      ]}
+                    >
+                      {proker.tanggal}
                     </Text>
                   </View>
                 )
@@ -213,11 +228,11 @@ export async function GET(req, res) {
 
             {/* Page Footer */}
             <PageFooter
-              totalMembers={membersData.length}
+              totalProker={prokerData.length}
               currentPageStart={pageIndex * itemsPerPage + 1}
               currentPageEnd={Math.min(
                 (pageIndex + 1) * itemsPerPage,
-                membersData.length
+                prokerData.length
               )}
             />
           </Page>
@@ -228,10 +243,12 @@ export async function GET(req, res) {
     return new NextResponse(stream, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="daftar-anggota-${organization.slug || 'organisasi'}.pdf"`
+        'Content-Disposition': `attachment; filename="daftar-program-kerja-${organization.slug || 'organisasi'}-${new Date().getFullYear()}.pdf"`
       }
     })
   } catch (error) {
+    console.error('Error generating PDF:', error)
+
     // Return error response
     return NextResponse.json(
       {
@@ -246,14 +263,14 @@ export async function GET(req, res) {
 
 const styles = StyleSheet.create({
   page: {
-    padding: 20,
+    padding: 15,
     fontFamily: 'Helvetica',
     backgroundColor: '#ffffff'
   },
 
   // Header Styles
   headerSection: {
-    marginBottom: 15,
+    marginBottom: 12,
     alignItems: 'center'
   },
   title: {
@@ -269,8 +286,8 @@ const styles = StyleSheet.create({
     marginBottom: 2
   },
   pageInfo: {
-    marginTop: 8,
-    marginBottom: 4
+    marginTop: 6,
+    marginBottom: 3
   },
   pageNumber: {
     fontSize: 9,
@@ -281,7 +298,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 1.5,
     backgroundColor: '#e2e8f0',
-    marginTop: 8
+    marginTop: 6
   },
 
   // Table Container
@@ -296,13 +313,13 @@ const styles = StyleSheet.create({
   // Table Row
   tableRow: {
     flexDirection: 'row',
-    minHeight: 18 // Sangat kompak untuk 100 data per halaman
+    minHeight: 24 // Increased for better readability
   },
 
   // Header Row
   headerRow: {
     backgroundColor: '#6366f1',
-    minHeight: 22 // Sedikit lebih tinggi untuk header
+    minHeight: 28
   },
 
   // Data Row
@@ -314,7 +331,7 @@ const styles = StyleSheet.create({
 
   // Table Cell Base
   tableCell: {
-    padding: 3, // Padding minimal untuk muat 100 data
+    padding: 4,
     justifyContent: 'center',
     borderRightWidth: 0.25,
     borderRightColor: '#e2e8f0'
@@ -327,37 +344,46 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     borderRightColor: '#8b5cf6',
-    padding: 4
+    padding: 5
   },
 
   // Data Cell
   dataCell: {
-    fontSize: 7, // Font size sangat kecil untuk muat 100 data
+    fontSize: 7,
     color: '#2d3748',
-    lineHeight: 1.1
+    lineHeight: 1.2
   },
 
-  // Column Widths - disesuaikan untuk layout kompak
+  // Column Widths - optimized for landscape A4
   noColumn: {
-    width: '8%',
+    width: '5%',
     textAlign: 'center'
   },
-  emailColumn: {
-    width: '40%',
+  namaColumn: {
+    width: '25%',
     textAlign: 'left',
     paddingLeft: 6
   },
-  namaColumn: {
-    width: '52%',
+  ketuaColumn: {
+    width: '18%',
     textAlign: 'left',
-    paddingLeft: 8,
+    paddingLeft: 6
+  },
+  deskripsiColumn: {
+    width: '32%',
+    textAlign: 'left',
+    paddingLeft: 6
+  },
+  tanggalColumn: {
+    width: '20%',
+    textAlign: 'center',
     borderRightWidth: 0
   },
 
   // Footer
   footer: {
-    marginTop: 10,
-    paddingTop: 8,
+    marginTop: 8,
+    paddingTop: 6,
     borderTopWidth: 0.5,
     borderTopColor: '#e2e8f0',
     flexDirection: 'row',
