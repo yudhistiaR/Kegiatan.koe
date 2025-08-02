@@ -22,20 +22,17 @@ import Link from 'next/link'
 export default function LaporanPage() {
   const [selectedReport, setSelectedReport] = useState('rab')
   const [rabFilter, setRabFilter] = useState('all')
-
-  // --- BARU: State untuk filter Laporan Progres Tugas ---
-  const [progresTugasFilter, setProgresTugasFilter] = useState('all') // Menyimpan ID proker
+  const [progresTugasFilter, setProgresTugasFilter] = useState('all')
+  const [tugasAnggotaFilter, setTugasAnggotaFilter] = useState('all')
 
   const handleRabFilterChange = filter => {
     setRabFilter(filter)
   }
 
-  // --- BARU: Handler untuk mengubah filter progres tugas ---
   const handleProgresTugasFilterChange = prokerId => {
     setProgresTugasFilter(prokerId)
   }
 
-  // --- DIUBAH: reportList diperbarui untuk progres-tugas ---
   const reportList = [
     {
       id: 'anggota',
@@ -58,13 +55,10 @@ export default function LaporanPage() {
     {
       id: 'progres-tugas',
       name: 'Laporan Progres Tugas',
-      // URL menjadi dinamis & menunjuk ke API PDF yang benar
-      // Tombol cetak akan nonaktif jika 'Semua' dipilih, karena API kita butuh prokerId
       url:
         progresTugasFilter !== 'all'
           ? `/laporan/progres-tugas/?prokerId=${progresTugasFilter}`
           : undefined,
-      // State dan handler di-pass sebagai props
       component: (
         <LaporanProgresTugas
           selectedProkerId={progresTugasFilter}
@@ -73,27 +67,32 @@ export default function LaporanPage() {
       )
     },
     {
+      // --- DIUBAH: Laporan Tugas per Anggota ---
       id: 'tugas-anggota',
       name: 'Laporan Tugas per Anggota',
-      // url: '/laporan/tugas-anggota', // Ganti dengan URL PDF jika ada
-      component: <LaporanTugasPerAnggota />
+      // URL menjadi dinamis menunjuk ke API PDF, menyertakan memberId
+      url: `/laporan/tugas-peranggota/?memberId=${tugasAnggotaFilter}`,
+      // State dan handler di-pass sebagai props
+      component: (
+        <LaporanTugasPerAnggota
+          selectedMemberId={tugasAnggotaFilter}
+          onFilterChange={setTugasAnggotaFilter}
+        />
+      )
     },
     {
       id: 'notulensi',
       name: 'Laporan Notulensi Rapat',
-      // url: '/laporan/notulensi', // Ganti dengan URL PDF jika ada
       component: <LaporanNotulensi />
     },
     {
       id: 'kinerja-divisi',
       name: 'Laporan Kinerja Divisi',
-      // url: '/laporan/kinerja-divisi', // Ganti dengan URL PDF jika ada
       component: <LaporanKinerjaDivisi />
     },
     {
       id: 'struktur-kepanitiaan',
       name: 'Laporan Struktur Kepanitiaan',
-      // url: '/laporan/struktur-kepanitiaan', // Ganti dengan URL PDF jika ada
       component: <LaporanStrukturKepanitiaan />
     }
   ]
@@ -132,7 +131,6 @@ export default function LaporanPage() {
               ))}
             </SelectContent>
           </Select>
-          {/* Tombol cetak akan aktif jika currentReport.url ada isinya */}
           {currentReport?.url && (
             <Link
               className={buttonVariants()}
