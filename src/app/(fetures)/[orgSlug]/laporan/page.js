@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -18,19 +18,28 @@ import LaporanTugasPerAnggota from '@/components/reports/LaporanTugasPerAnggota'
 import LaporanNotulensi from '@/components/reports/LaporanNotulensi'
 import LaporanKinerjaDivisi from '@/components/reports/LaporanKinerjaDivisi'
 import LaporanStrukturKepanitiaan from '@/components/reports/LaporanStrukturKepanitiaan'
+import Link from 'next/link'
 
 const reportList = [
   {
     id: 'anggota',
     name: 'Laporan Daftar Anggota',
+    url: '/laporan/daftar-anggota',
     component: <LaporanAnggota />
   },
   {
     id: 'proker',
     name: 'Laporan Daftar Program Kerja',
+    url: '/laporan/daftar-proker',
     component: <LaporanProker />
   },
-  { id: 'rab', name: 'Laporan Anggaran (RAB)', component: <LaporanRab /> },
+  {
+    id: 'rab',
+    name: 'Laporan Anggaran (RAB)',
+    url: '/laporan/daftar-proker',
+    component: <LaporanRab />
+  },
+
   {
     id: 'progres-tugas',
     name: 'Laporan Progres Tugas',
@@ -93,10 +102,10 @@ export default function LaporanPage() {
               ))}
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Link className={buttonVariants()} href={selectedReport.url}>
             <Printer className="mr-2 h-4 w-4" />
             Cetak
-          </Button>
+          </Link>
         </div>
       </div>
       <div className="p-6">
