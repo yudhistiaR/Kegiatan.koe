@@ -2,7 +2,15 @@ import { ReponseError } from '../errors/ResponseError'
 import { NextResponse } from 'next/server'
 
 export class LaporanController {
-  constructor(organisasiService, prokerService, rabService, tugasService, notulenService, divisiService, clerk) {
+  constructor(
+    organisasiService,
+    prokerService,
+    rabService,
+    tugasService,
+    notulenService,
+    divisiService,
+    clerk
+  ) {
     this.organisasiService = organisasiService
     this.prokerService = prokerService
     this.rabService = rabService
@@ -103,14 +111,18 @@ export class LaporanController {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
       }
 
-      const divisions = await this.divisiService.GET_DIVISIONS_WITH_MEMBERS_BY_ORG(org_id)
-      const taskCounts = await this.tugasService.GET_TASK_COUNTS_BY_DIVISI(org_id)
+      const divisions =
+        await this.divisiService.GET_DIVISIONS_WITH_MEMBERS_BY_ORG(org_id)
+      const taskCounts =
+        await this.tugasService.GET_TASK_COUNTS_BY_DIVISI(org_id)
       const rabTotals = await this.rabService.GET_TOTAL_RAB_BY_DIVISI(org_id)
 
       const result = divisions.map(divisi => ({
         id: divisi.id,
         name: divisi.name,
-        members: divisi.anggota.map(member => `${member.user.firstName} ${member.user.lastName}`).join(', '),
+        members: divisi.anggota
+          .map(member => `${member.user.firstName} ${member.user.lastName}`)
+          .join(', '),
         completedTasks: taskCounts[divisi.id]?.DONE || 0,
         pendingTasks: taskCounts[divisi.id]?.PENDING || 0,
         rabUsed: rabTotals[divisi.id] || 0
@@ -129,11 +141,11 @@ export class LaporanController {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
       }
 
-      const data = await this.prokerService.GET_WITH_DIVISIONS_AND_MEMBERS(org_id)
+      const data =
+        await this.prokerService.GET_WITH_DIVISIONS_AND_MEMBERS(org_id)
       return NextResponse.json(data, { status: 200 })
     } catch (error) {
       return ReponseError(error)
     }
   }
 }
-

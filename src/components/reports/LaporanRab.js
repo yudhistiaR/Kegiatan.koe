@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@clerk/nextjs'
 import { formatCurrency } from '@/lib/utils'
@@ -13,7 +13,7 @@ import {
   SelectValue
 } from '@/components/ui/select'
 
-const LaporanRab = () => {
+const LaporanRab = ({ onFilterChange }) => {
   const { orgId } = useAuth()
   const [selectedProkerFilter, setSelectedProkerFilter] = useState('all')
 
@@ -100,12 +100,23 @@ const LaporanRab = () => {
 
   const handleProkerFilterChange = value => {
     setSelectedProkerFilter(value)
+    // Notify parent component about filter change
+    if (onFilterChange) {
+      onFilterChange(value)
+    }
   }
 
   const allProkerTitles = useMemo(() => {
     const titles = prokerList?.map(p => p.title) || []
     return ['all', ...new Set(titles)]
   }, [prokerList])
+
+  // Notify parent about initial filter value
+  useEffect(() => {
+    if (onFilterChange) {
+      onFilterChange(selectedProkerFilter)
+    }
+  }, [selectedProkerFilter, onFilterChange])
 
   if (errorRab) return <p>Error: {errorRab.message}</p>
 

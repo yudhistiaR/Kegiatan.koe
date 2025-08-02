@@ -1,5 +1,4 @@
 'use client'
-
 import { useState } from 'react'
 import { buttonVariants } from '@/components/ui/button'
 import {
@@ -20,62 +19,73 @@ import LaporanKinerjaDivisi from '@/components/reports/LaporanKinerjaDivisi'
 import LaporanStrukturKepanitiaan from '@/components/reports/LaporanStrukturKepanitiaan'
 import Link from 'next/link'
 
-const reportList = [
-  {
-    id: 'anggota',
-    name: 'Laporan Daftar Anggota',
-    url: '/laporan/daftar-anggota',
-    component: <LaporanAnggota />
-  },
-  {
-    id: 'proker',
-    name: 'Laporan Daftar Program Kerja',
-    url: '/laporan/daftar-proker',
-    component: <LaporanProker />
-  },
-  {
-    id: 'rab',
-    name: 'Laporan Anggaran (RAB)',
-    url: '/laporan/daftar-proker',
-    component: <LaporanRab />
-  },
-
-  {
-    id: 'progres-tugas',
-    name: 'Laporan Progres Tugas',
-    component: <LaporanProgresTugas />
-  },
-  {
-    id: 'tugas-anggota',
-    name: 'Laporan Tugas per Anggota',
-    component: <LaporanTugasPerAnggota />
-  },
-  {
-    id: 'notulensi',
-    name: 'Laporan Notulensi Rapat',
-    component: <LaporanNotulensi />
-  },
-  {
-    id: 'kinerja-divisi',
-    name: 'Laporan Kinerja Divisi',
-    component: <LaporanKinerjaDivisi />
-  },
-  {
-    id: 'struktur-kepanitiaan',
-    name: 'Laporan Struktur Kepanitiaan',
-    component: <LaporanStrukturKepanitiaan />
-  }
-]
-
 export default function LaporanPage() {
-  const [selectedReport, setSelectedReport] = useState(reportList[0])
+  const [selectedReport, setSelectedReport] = useState('rab')
+  const [rabFilter, setRabFilter] = useState('all')
+
+  const handleRabFilterChange = filter => {
+    setRabFilter(filter)
+  }
+
+  const reportList = [
+    {
+      id: 'anggota',
+      name: 'Laporan Daftar Anggota',
+      url: '/laporan/daftar-anggota',
+      component: <LaporanAnggota />
+    },
+    {
+      id: 'proker',
+      name: 'Laporan Daftar Program Kerja',
+      url: '/laporan/daftar-proker',
+      component: <LaporanProker />
+    },
+    {
+      id: 'rab',
+      name: 'Laporan Anggaran (RAB)',
+      url: `/laporan/rab-proker${rabFilter !== 'all' ? `?proker=${encodeURIComponent(rabFilter)}` : ''}`,
+      component: <LaporanRab onFilterChange={handleRabFilterChange} />
+    },
+    {
+      id: 'progres-tugas',
+      name: 'Laporan Progres Tugas',
+      url: '/laporan/progres-tugas',
+      component: <LaporanProgresTugas />
+    },
+    {
+      id: 'tugas-anggota',
+      name: 'Laporan Tugas per Anggota',
+      url: '/laporan/tugas-anggota',
+      component: <LaporanTugasPerAnggota />
+    },
+    {
+      id: 'notulensi',
+      name: 'Laporan Notulensi Rapat',
+      url: '/laporan/notulensi',
+      component: <LaporanNotulensi />
+    },
+    {
+      id: 'kinerja-divisi',
+      name: 'Laporan Kinerja Divisi',
+      url: '/laporan/kinerja-divisi',
+      component: <LaporanKinerjaDivisi />
+    },
+    {
+      id: 'struktur-kepanitiaan',
+      name: 'Laporan Struktur Kepanitiaan',
+      url: '/laporan/struktur-kepanitiaan',
+      component: <LaporanStrukturKepanitiaan />
+    }
+  ]
 
   const handleReportChange = reportId => {
     const report = reportList.find(r => r.id === reportId)
     if (report) {
-      setSelectedReport(report)
+      setSelectedReport(reportId)
     }
   }
+
+  const currentReport = reportList.find(r => r.id === selectedReport)
 
   return (
     <div>
@@ -89,7 +99,7 @@ export default function LaporanPage() {
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Select
             onValueChange={handleReportChange}
-            defaultValue={selectedReport.id}
+            defaultValue={selectedReport}
           >
             <SelectTrigger className="w-full sm:w-[280px]">
               <SelectValue placeholder="Pilih Jenis Laporan" />
@@ -102,15 +112,20 @@ export default function LaporanPage() {
               ))}
             </SelectContent>
           </Select>
-          <Link className={buttonVariants()} href={selectedReport.url}>
+          <Link
+            className={buttonVariants()}
+            href={currentReport?.url || '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Printer className="mr-2 h-4 w-4" />
             Cetak
           </Link>
         </div>
       </div>
       <div className="p-6">
-        {selectedReport ? (
-          selectedReport.component
+        {currentReport ? (
+          currentReport.component
         ) : (
           <p>Pilih laporan untuk ditampilkan.</p>
         )}
