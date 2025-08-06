@@ -36,7 +36,7 @@ const formatCurrency = amount => {
 // Component for page header (Disesuaikan)
 const PageHeader = ({ orgName, pageNumber, totalPages }) => (
   <View style={styles.headerSection}>
-    <Text style={styles.title}>LAPORAN STRUKTUR KEPANITIAAN</Text>
+    <Text style={styles.title}>LAPORAN KINERJA DIVIS</Text>
     <Text style={styles.subtitle}>
       {orgName?.toUpperCase() || 'ORGANISASI'}
     </Text>
