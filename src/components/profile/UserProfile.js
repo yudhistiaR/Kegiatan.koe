@@ -23,14 +23,14 @@ const UserProfile = () => {
   } = useQuery({
     queryKey: ['me', user?.id],
     queryFn: async () => {
-      const res = await fetch(`/api/v1/me`)
+      const res = await fetch(`/api/v1/clerk/user`)
       return res.json()
     }
   })
 
   const updateUserProfile = useMutation({
     mutationFn: async data => {
-      const req = await fetch('/api/v1/me', {
+      const req = await fetch('/api/v1/clerk/user', {
         method: 'PUT',
         body: JSON.stringify(data)
       })
@@ -69,6 +69,7 @@ const UserProfile = () => {
   })
 
   const onSubmit = data => {
+    user.reload()
     updateUserProfile.mutate(data)
   }
 
@@ -101,7 +102,11 @@ const UserProfile = () => {
             >
               <div className="grid gap-3">
                 <Label>Username</Label>
-                <Input placeholder="Username" {...register('username')} />
+                <Input
+                  placeholder="Username"
+                  {...register('username')}
+                  disabled
+                />
               </div>
               <div className="grid gap-3">
                 <Label>NPM/NIM</Label>
