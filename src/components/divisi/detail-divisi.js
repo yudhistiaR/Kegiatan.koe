@@ -45,6 +45,8 @@ import { useAuth } from '@clerk/nextjs'
 import { toast } from 'sonner'
 import { LoadingState, ErrorState } from '@/components/LoadState/LoadStatus'
 
+import { Protect } from '@clerk/nextjs'
+
 const columnHelper = createColumnHelper()
 
 function DetailDivisi() {
@@ -199,7 +201,9 @@ function DetailDivisi() {
                     <p>Total anggota divisi</p>
                   </TooltipContent>
                 </Tooltip>
-                <TambahAnggota divisiId={divisi.id} />
+                <Protect permission="divisi:edit">
+                  <TambahAnggota divisiId={divisi.id} />
+                </Protect>
               </div>
             </div>
           </CardHeader>

@@ -24,6 +24,7 @@ import { useAuth } from '@clerk/nextjs'
 import { toast } from 'sonner'
 import CreatedTaskDialog from './CreatedTaskDialog'
 import { ErrorState } from '@/components/LoadState/LoadStatus'
+import { Protect } from '@clerk/nextjs'
 
 //Kanban-components
 import DraggableItem from './DraggableItem'
@@ -420,10 +421,15 @@ export default function KanbanBoard({
       onDragCancel={handleDragCancel}
       collisionDetection={closestCenter}
     >
-      <div className="space-y-4">
-        {showCreateDialog && (
-          <CreatedTaskDialog divisiId={divisiId} scope={scope} />
-        )}
+      <div className="w-full my-4 space-y-4">
+        <div className="w-full flex justify-between items-center">
+          <h1 className="text-2xl font-bold">List Tugas Program Kerja</h1>
+          <Protect permission="tugas:create">
+            {showCreateDialog && (
+              <CreatedTaskDialog divisiId={divisiId} scope={scope} />
+            )}
+          </Protect>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {Object.entries(columns).map(([status, items]) => (
             <DroppableContainer

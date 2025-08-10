@@ -10,7 +10,7 @@ import { notFound, useParams } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const ProkerDivisi = dynamic(
-  () => import('@/components/proker/Proker-divisi'),
+  () => import('@/components/proker/divisi/ProkerDivisi'),
   { loading: () => <p>Loading...</p> }
 )
 const ProkerDetail = dynamic(
