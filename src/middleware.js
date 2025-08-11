@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server'
 
 const isOnboardingRoute = createRouteMatcher(['/onboarding'])
 const isPublicRoute = createRouteMatcher([
+  '/',
+  '/tentang-kami',
+  '/why-free',
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/webhooks(.*)',
