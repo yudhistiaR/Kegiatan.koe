@@ -4,6 +4,7 @@ import './globals.css'
 //Providers
 import { ClerkProvider } from '@clerk/nextjs'
 import { Providers } from '@/lib/utils'
+import { shadesOfPurple } from '@clerk/themes'
 
 const poppins = Poppins({
   variable: '--font-poppins',
@@ -18,7 +19,30 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        baseTheme: shadesOfPurple,
+        variables: {
+          colorForeground: '#ffffff',
+          colorBackground: '#202442',
+          colorMuted: '#25294a'
+        },
+        signIn: {
+          variables: {
+            colorForeground: '#ffffff',
+            colorBackground: '#202442',
+            colorMuted: '#25294a'
+          }
+        },
+        signUp: {
+          variables: {
+            colorForeground: '#ffffff',
+            colorBackground: '#202442',
+            colorMuted: '#25294a'
+          }
+        }
+      }}
+    >
       <Providers>
         <html lang="id">
           <body className={`${poppins.variable} antialiased`}>{children}</body>
