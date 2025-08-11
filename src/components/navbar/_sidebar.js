@@ -32,10 +32,10 @@ import {
   PanelRightOpen,
   LayoutDashboard,
   Logs,
-  SquareChartGantt,
   Settings,
   Target,
-  FileSearchIcon
+  FileSearchIcon,
+  HandCoins
 } from 'lucide-react'
 
 const menu = [
@@ -55,9 +55,9 @@ const menu = [
     icon: <Logs />
   },
   {
-    path: 'timeline',
-    name: 'Timeline',
-    icon: <SquareChartGantt />
+    path: 'keuangan',
+    name: 'Keuangan',
+    icon: <HandCoins />
   },
   {
     path: 'laporan',

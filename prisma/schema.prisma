@@ -161,10 +161,38 @@ model rab {
   harga    String
   jumlah   String
   satuan   String
+  status  Boolean @default(false)
 
   divisi     Divisi?     @relation(fields: [divisiId], references: [id], onDelete: Cascade)
   proker     Proker?     @relation(fields: [prokerId], references: [id], onDelete: Cascade)
   organisasi Organisasi? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
+
+model Keuangan {
+  id       String  @id @unique @default(uuid())
+  orgId    String?
+  prokerId String?
+  divisiId String?
+  jumlah   String?
+}
+
+model DataMasuk {
+  id String @id @unique @default(uuid())
+  jumlah String
+  deskripsi String
+}
+
+model DataKeluar {
+  id String @id @unique @default(uuid())
+  jumlah String
+  deskripsi String
+}
+
+model DanaProgramKerja {
+  id       String  @id @unique @default(uuid())
+  orgId    String?
+  prokerId String?
+  divisiId String?
 }
 
 model notulensi {
