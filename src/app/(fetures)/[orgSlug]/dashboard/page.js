@@ -6,9 +6,7 @@ import {
   User,
   CircleCheckBig,
   SquareX,
-  CheckCircle,
-  AlertCircle,
-  Clock
+  CheckCircle
 } from 'lucide-react'
 import { LoadingState, ErrorState } from '@/components/LoadState/LoadStatus'
 import Image from 'next/image'

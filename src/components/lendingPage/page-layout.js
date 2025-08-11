@@ -1,16 +1,12 @@
-import { Button, buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import Link from 'next/link'
 import Image from 'next/image'
 
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton
-} from '@clerk/nextjs'
+import { SignedIn, SignedOut, UserButton, useAuth } from '@clerk/nextjs'
 
 export function PageLayout({ children, currentPage }) {
+  const { orgSlug } = useAuth()
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -35,7 +31,7 @@ export function PageLayout({ children, currentPage }) {
             <div className="hidden md:flex items-center space-x-8">
               <SignedIn>
                 <Link
-                  href="/tamu/dashboard"
+                  href={`/${orgSlug ?? 'tamu'}/dashboard`}
                   className={`transition-colors ${currentPage === 'features' ? 'text-accentColor font-medium' : 'text-gray-300 hover:text-white'}`}
                 >
                   Dashboard

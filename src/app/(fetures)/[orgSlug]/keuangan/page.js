@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { DollarSign, Coins, ShieldCheck, BanknoteArrowDown } from 'lucide-react'
+import { DollarSign, Coins, ShieldCheck } from 'lucide-react'
 
 import DetailKeuangan from '@/components/keuangan/DetailKeuangan'
 

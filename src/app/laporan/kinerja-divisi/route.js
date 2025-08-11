@@ -95,7 +95,7 @@ const PageFooter = ({ totalDivisi }) => (
   </View>
 )
 
-export async function GET(req) {
+export async function GET(_req) {
   try {
     const { userId, orgId } = await auth()
     if (!userId || !orgId) {

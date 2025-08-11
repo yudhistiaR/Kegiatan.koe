@@ -172,7 +172,7 @@ export default function LandingPage() {
             <div className="relative">
               <div className="bg-[#2d3154] rounded-2xl shadow-2xl p-6 border border-[#3d4166]">
                 <Image
-                  src="/modern-dashboard.png"
+                  src="/dashboard.png"
                   alt="Kegiatan.koe Dashboard"
                   width={600}
                   height={400}
