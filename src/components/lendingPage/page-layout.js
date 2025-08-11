@@ -59,7 +59,6 @@ export function PageLayout({ children, currentPage }) {
               <SignedOut>
                 <Link
                   href="/sign-in"
-                  Masuk
                   className={`${buttonVariants({ variant: 'outline', size: 'sm' })} "border-accentColor text-white hover:bg-[#4b6fd7] bg-transparent"`}
                 >
                   Masuk
