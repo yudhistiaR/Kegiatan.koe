@@ -1,49 +1,22 @@
-'use client'
-
-import { notFound } from 'next/navigation'
-import { ProkerForm } from '@/components/proker/form'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger
-} from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
+import { auth } from '@clerk/nextjs/server'
 import ProkerList from '@/components/proker/Proker-list'
-import { useAuth } from '@clerk/nextjs'
+import CreateProker from '@/components/proker/CreateProker'
 
-const ProkerPage = () => {
-  const { userId, orgId, isLoaded } = useAuth()
+const ProkerPage = async () => {
+  const { has } = await auth()
 
-  if (!isLoaded) return
-  if (!userId && !orgId) notFound()
+  const isAccessCreate = has({ permission: 'program_kerja:create' })
+  const isAccessView = has({ permission: 'program_kerja:view' })
 
   return (
     <div className="w-full h-full">
-      {userId && orgId ? (
+      {isAccessCreate && (
         <div className="mb-4 sticky top-0 right-0 bg-background p-4 rounded-md shadow-lg flex justify-end items-center gap-4 z-10">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button>+ Buat</Button>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Buat Proker</SheetTitle>
-                <SheetDescription>
-                  Buat Program Kerja ada disini. Klik simpan ketian selesai.
-                </SheetDescription>
-              </SheetHeader>
-              {/* Proker Form */}
-              <ProkerForm />
-              {/* Proker Form End */}
-            </SheetContent>
-          </Sheet>
+          <CreateProker />
         </div>
-      ) : null}
+      )}
       {/* Proker List */}
-      <ProkerList />
+      {isAccessView && <ProkerList />}
     </div>
   )
 }

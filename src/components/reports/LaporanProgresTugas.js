@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@clerk/nextjs'
 import { formatDate } from '@/helpers/formatedate'
@@ -13,10 +13,8 @@ import {
   SelectValue
 } from '@/components/ui/select'
 
-const LaporanProgresTugas = () => {
+const LaporanProgresTugas = ({ selectedProkerId, onFilterChange }) => {
   const { orgId } = useAuth()
-  const [selectedProkerFilter, setSelectedProkerFilter] = useState('all')
-
   const {
     data: tugasData,
     isLoading: isLoadingTugas,
@@ -48,7 +46,12 @@ const LaporanProgresTugas = () => {
   const groupedData = useMemo(() => {
     if (!tugasData) return {}
 
-    const grouped = tugasData.reduce((acc, item) => {
+    const filteredTugas =
+      selectedProkerId === 'all'
+        ? tugasData
+        : tugasData.filter(item => item.proker?.id === selectedProkerId)
+
+    const grouped = filteredTugas.reduce((acc, item) => {
       const prokerTitle = item.proker?.title || 'Tanpa Program Kerja'
       if (!acc[prokerTitle]) {
         acc[prokerTitle] = []
@@ -57,24 +60,16 @@ const LaporanProgresTugas = () => {
       return acc
     }, {})
 
-    if (selectedProkerFilter === 'all') {
-      return grouped
-    } else {
-      return { [selectedProkerFilter]: grouped[selectedProkerFilter] || [] }
-    }
-  }, [tugasData, selectedProkerFilter])
-
-  const allProkerTitles = useMemo(() => {
-    const titles = prokerList?.map(p => p.title) || []
-    return ['all', ...new Set(titles)]
-  }, [prokerList])
-
-  const handleProkerFilterChange = value => {
-    setSelectedProkerFilter(value)
-  }
+    return grouped
+  }, [tugasData, selectedProkerId])
 
   const columns = useMemo(
     () => [
+      {
+        header: 'No',
+        cell: ({ row }) => row.index + 1,
+        size: 50
+      },
       {
         accessorKey: 'name',
         header: 'Nama Tugas'
@@ -117,26 +112,28 @@ const LaporanProgresTugas = () => {
         Laporan Progres Tugas per Program Kerja
       </h2>
       <div className="flex items-center gap-4">
-        <span className="text-white">Filter berdasarkan Program Kerja:</span>
-        <Select
-          onValueChange={handleProkerFilterChange}
-          defaultValue={selectedProkerFilter}
-        >
+        <span className="text-sm">Filter berdasarkan Program Kerja:</span>
+        <Select onValueChange={onFilterChange} value={selectedProkerId}>
           <SelectTrigger className="w-[280px]">
             <SelectValue placeholder="Pilih Program Kerja" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Semua Program Kerja</SelectItem>
-            {allProkerTitles
-              .filter(title => title !== 'all')
-              .map(title => (
-                <SelectItem key={title} value={title}>
-                  {title}
-                </SelectItem>
-              ))}
+            {prokerList?.map(proker => (
+              <SelectItem key={proker.id} value={proker.id}>
+                {proker.title}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
+
+      {Object.keys(groupedData).length === 0 && !isLoadingTugas && (
+        <div className="text-center py-10">
+          <p>Tidak ada data tugas untuk program kerja yang dipilih.</p>
+        </div>
+      )}
+
       {Object.entries(groupedData).map(([prokerTitle, items]) => (
         <div
           key={prokerTitle}
@@ -148,8 +145,8 @@ const LaporanProgresTugas = () => {
           <DataTable
             data={items}
             columns={columns}
-            isLoading={isLoadingTugas && isLoadingProker}
-            enableGlobalFilter={false} // Disable global filter for sub-tables
+            isLoading={isLoadingTugas || isLoadingProker}
+            enableGlobalFilter={false}
           />
         </div>
       ))}

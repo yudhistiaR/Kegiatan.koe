@@ -10,7 +10,7 @@ export class ProkerController {
   }
 
   async GET() {
-    const { orgId } = auth()
+    const { orgId } = await auth()
 
     try {
       const res = await this.prokerService.GET(orgId)

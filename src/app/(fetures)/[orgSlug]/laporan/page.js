@@ -1,7 +1,6 @@
 'use client'
-
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -18,55 +17,93 @@ import LaporanTugasPerAnggota from '@/components/reports/LaporanTugasPerAnggota'
 import LaporanNotulensi from '@/components/reports/LaporanNotulensi'
 import LaporanKinerjaDivisi from '@/components/reports/LaporanKinerjaDivisi'
 import LaporanStrukturKepanitiaan from '@/components/reports/LaporanStrukturKepanitiaan'
-
-const reportList = [
-  {
-    id: 'anggota',
-    name: 'Laporan Daftar Anggota',
-    component: <LaporanAnggota />
-  },
-  {
-    id: 'proker',
-    name: 'Laporan Daftar Program Kerja',
-    component: <LaporanProker />
-  },
-  { id: 'rab', name: 'Laporan Anggaran (RAB)', component: <LaporanRab /> },
-  {
-    id: 'progres-tugas',
-    name: 'Laporan Progres Tugas',
-    component: <LaporanProgresTugas />
-  },
-  {
-    id: 'tugas-anggota',
-    name: 'Laporan Tugas per Anggota',
-    component: <LaporanTugasPerAnggota />
-  },
-  {
-    id: 'notulensi',
-    name: 'Laporan Notulensi Rapat',
-    component: <LaporanNotulensi />
-  },
-  {
-    id: 'kinerja-divisi',
-    name: 'Laporan Kinerja Divisi',
-    component: <LaporanKinerjaDivisi />
-  },
-  {
-    id: 'struktur-kepanitiaan',
-    name: 'Laporan Struktur Kepanitiaan',
-    component: <LaporanStrukturKepanitiaan />
-  }
-]
+import Link from 'next/link'
 
 export default function LaporanPage() {
-  const [selectedReport, setSelectedReport] = useState(reportList[0])
+  const [selectedReport, setSelectedReport] = useState('rab')
+  const [rabFilter, setRabFilter] = useState('all')
+  const [progresTugasFilter, setProgresTugasFilter] = useState('all')
+  const [tugasAnggotaFilter, setTugasAnggotaFilter] = useState('all')
+
+  const handleRabFilterChange = filter => {
+    setRabFilter(filter)
+  }
+
+  const handleProgresTugasFilterChange = prokerId => {
+    setProgresTugasFilter(prokerId)
+  }
+
+  const reportList = [
+    {
+      id: 'anggota',
+      name: 'Laporan Daftar Anggota',
+      url: '/laporan/daftar-anggota',
+      component: <LaporanAnggota />
+    },
+    {
+      id: 'proker',
+      name: 'Laporan Daftar Program Kerja',
+      url: '/laporan/daftar-proker',
+      component: <LaporanProker />
+    },
+    {
+      id: 'rab',
+      name: 'Laporan Anggaran (RAB)',
+      url: `/laporan/rab-proker/${rabFilter !== 'all' ? `?proker=${encodeURIComponent(rabFilter)}` : ''}`,
+      component: <LaporanRab onFilterChange={handleRabFilterChange} />
+    },
+    {
+      id: 'progres-tugas',
+      name: 'Laporan Progres Tugas',
+      url:
+        progresTugasFilter !== 'all'
+          ? `/laporan/progres-tugas/?prokerId=${progresTugasFilter}`
+          : undefined,
+      component: (
+        <LaporanProgresTugas
+          selectedProkerId={progresTugasFilter}
+          onFilterChange={handleProgresTugasFilterChange}
+        />
+      )
+    },
+    {
+      id: 'tugas-anggota',
+      name: 'Laporan Tugas per Anggota',
+      url: `/laporan/tugas-peranggota/?memberId=${tugasAnggotaFilter}`,
+      component: (
+        <LaporanTugasPerAnggota
+          selectedMemberId={tugasAnggotaFilter}
+          onFilterChange={setTugasAnggotaFilter}
+        />
+      )
+    },
+    {
+      id: 'notulensi',
+      name: 'Laporan Notulensi Rapat',
+      component: <LaporanNotulensi />
+    },
+    {
+      id: 'kinerja-divisi',
+      name: 'Laporan Kinerja Divisi',
+      url: '/laporan/kinerja-divisi',
+      component: <LaporanKinerjaDivisi />
+    },
+    {
+      id: 'struktur-kepanitiaan',
+      name: 'Laporan Struktur Kepanitiaan',
+      url: '/laporan/kepanitiaan',
+      component: <LaporanStrukturKepanitiaan />
+    }
+  ]
 
   const handleReportChange = reportId => {
     const report = reportList.find(r => r.id === reportId)
     if (report) {
-      setSelectedReport(report)
+      setSelectedReport(reportId)
     }
   }
+
+  const currentReport = reportList.find(r => r.id === selectedReport)
 
   return (
     <div>
@@ -80,7 +117,7 @@ export default function LaporanPage() {
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Select
             onValueChange={handleReportChange}
-            defaultValue={selectedReport.id}
+            defaultValue={selectedReport}
           >
             <SelectTrigger className="w-full sm:w-[280px]">
               <SelectValue placeholder="Pilih Jenis Laporan" />
@@ -93,15 +130,22 @@ export default function LaporanPage() {
               ))}
             </SelectContent>
           </Select>
-          <Button variant="outline">
-            <Printer className="mr-2 h-4 w-4" />
-            Cetak
-          </Button>
+          {currentReport?.url && (
+            <Link
+              className={buttonVariants()}
+              href={currentReport.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Printer className="mr-2 h-4 w-4" />
+              Cetak
+            </Link>
+          )}
         </div>
       </div>
       <div className="p-6">
-        {selectedReport ? (
-          selectedReport.component
+        {currentReport ? (
+          currentReport.component
         ) : (
           <p>Pilih laporan untuk ditampilkan.</p>
         )}

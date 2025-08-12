@@ -23,6 +23,11 @@ const LaporanAnggota = () => {
   const columns = useMemo(
     () => [
       {
+        header: 'No',
+        cell: ({ row }) => row.index + 1,
+        size: 50
+      },
+      {
         accessorKey: 'user.firstName',
         header: 'Nama Lengkap',
         cell: ({ row }) => {
@@ -33,7 +38,7 @@ const LaporanAnggota = () => {
       },
       {
         accessorKey: 'user.npm',
-        header: 'NPM / Nomor Induk'
+        header: 'NPM/NIM'
       },
       {
         accessorKey: 'user.email',

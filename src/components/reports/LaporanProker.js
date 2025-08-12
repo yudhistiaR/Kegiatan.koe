@@ -24,6 +24,11 @@ const LaporanProker = () => {
   const columns = useMemo(
     () => [
       {
+        header: 'No',
+        cell: ({ row }) => row.index + 1,
+        size: 50
+      },
+      {
         accessorKey: 'title',
         header: 'Nama Program Kerja'
       },

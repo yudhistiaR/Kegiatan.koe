@@ -24,6 +24,11 @@ const LaporanDaftarProker = () => {
   const columns = useMemo(
     () => [
       {
+        header: 'No',
+        cell: ({ row }) => row.index + 1,
+        size: 50
+      },
+      {
         accessorKey: 'title',
         header: 'Nama Program Kerja'
       },
@@ -58,7 +63,9 @@ const LaporanDaftarProker = () => {
       {data && data.length > 0 ? (
         <DataTable data={data} columns={columns} isLoading={isLoading} />
       ) : (
-        <p className="text-center text-muted-foreground">Tidak ada data program kerja.</p>
+        <p className="text-center text-muted-foreground">
+          Tidak ada data program kerja.
+        </p>
       )}
     </div>
   )

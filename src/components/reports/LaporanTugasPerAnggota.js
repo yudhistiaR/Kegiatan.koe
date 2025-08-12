@@ -13,9 +13,12 @@ import {
   SelectValue
 } from '@/components/ui/select'
 
-const LaporanTugasPerAnggota = () => {
+// --- DIUBAH: Menerima props selectedMemberId dan onFilterChange ---
+const LaporanTugasPerAnggota = ({ selectedMemberId, onFilterChange }) => {
   const { orgId } = useAuth()
-  const [selectedMemberFilter, setSelectedMemberFilter] = useState('all')
+
+  // --- DIHAPUS: State lokal tidak lagi digunakan ---
+  // const [selectedMemberFilter, setSelectedMemberFilter] = useState('all')
 
   const {
     data: tugasData,
@@ -45,6 +48,7 @@ const LaporanTugasPerAnggota = () => {
     enabled: !!orgId
   })
 
+  // --- DIUBAH: Logika filter menggunakan prop selectedMemberId ---
   const filteredAndGroupedData = useMemo(() => {
     if (!tugasData) return {}
 
@@ -56,10 +60,7 @@ const LaporanTugasPerAnggota = () => {
           `${assignee.user.firstName} ${assignee.user.lastName}`.trim()
         const memberId = assignee.user.id
 
-        if (
-          selectedMemberFilter === 'all' ||
-          selectedMemberFilter === memberId
-        ) {
+        if (selectedMemberId === 'all' || selectedMemberId === memberId) {
           if (!grouped[memberName]) {
             grouped[memberName] = []
           }
@@ -74,7 +75,7 @@ const LaporanTugasPerAnggota = () => {
     })
 
     return grouped
-  }, [tugasData, selectedMemberFilter])
+  }, [tugasData, selectedMemberId])
 
   const allMembers = useMemo(() => {
     const members =
@@ -85,12 +86,18 @@ const LaporanTugasPerAnggota = () => {
     return [{ id: 'all', name: 'Semua Anggota' }, ...members]
   }, [membersList])
 
-  const handleMemberFilterChange = value => {
-    setSelectedMemberFilter(value)
-  }
+  // --- DIHAPUS: Handler lokal tidak lagi digunakan ---
+  // const handleMemberFilterChange = value => {
+  //   setSelectedMemberFilter(value)
+  // }
 
   const columns = useMemo(
     () => [
+      {
+        header: 'No',
+        cell: ({ row }) => row.index + 1,
+        size: 50
+      },
       {
         accessorKey: 'name',
         header: 'Nama Tugas'
@@ -119,10 +126,8 @@ const LaporanTugasPerAnggota = () => {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <span className="text-white">Filter berdasarkan Anggota:</span>
-        <Select
-          onValueChange={handleMemberFilterChange}
-          defaultValue={selectedMemberFilter}
-        >
+        {/* --- DIUBAH: Select dikontrol oleh props dari induk --- */}
+        <Select onValueChange={onFilterChange} value={selectedMemberId}>
           <SelectTrigger className="w-[280px]">
             <SelectValue placeholder="Pilih Anggota" />
           </SelectTrigger>
