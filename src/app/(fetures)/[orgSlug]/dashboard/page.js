@@ -23,6 +23,7 @@ const DashboardPage = () => {
     enabled: isLoaded
   })
 
+  console.log(data)
   if (isPending || isLoading) {
     return <LoadingState />
   }
