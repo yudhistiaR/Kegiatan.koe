@@ -6,7 +6,66 @@ export class ProkerService {
   async GET(orgId) {
     return await this.prisma.proker.findMany({
       where: {
-        org_id: orgId
+        orgId: orgId
+      },
+      select: {
+        id: true,
+        orgId: true,
+        ketuaPelaksanaId: true,
+        title: true,
+        description: true,
+        start: true,
+        end: true,
+        created_at: true,
+        divisi: {
+          select: {
+            id: true,
+            name: true,
+            description: true
+          }
+        },
+        ketua_pelaksana: {
+          select: {
+            id: true,
+            fullName: true
+          }
+        },
+        tugas: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            priority: true,
+            status: true,
+            start: true,
+            end: true
+          }
+        },
+        rab: {
+          select: {
+            listRab: {
+              select: {
+                id: true,
+                rabId: true,
+                nama: true,
+                harga: true,
+                jumlah: true,
+                satuan: true
+              }
+            }
+          }
+        },
+        notulensi: {
+          select: {
+            id: true,
+            title: true,
+            date: true,
+            location: true,
+            agenda: true,
+            attendees: true,
+            content: true
+          }
+        }
       }
     })
   }
@@ -14,7 +73,7 @@ export class ProkerService {
   async GET_WITH_DIVISIONS_AND_MEMBERS(orgId) {
     return await this.prisma.proker.findMany({
       where: {
-        org_id: orgId
+        orgId: orgId
       },
       select: {
         id: true,
@@ -52,9 +111,9 @@ export class ProkerService {
       },
       select: {
         id: true,
-        org_id: true,
+        orgId: true,
+        ketuaPelaksanaId: true,
         title: true,
-        author: true,
         description: true,
         start: true,
         end: true,
@@ -64,6 +123,12 @@ export class ProkerService {
             id: true,
             name: true,
             description: true
+          }
+        },
+        ketua_pelaksana: {
+          select: {
+            id: true,
+            fullName: true
           }
         },
         tugas: {
@@ -79,11 +144,16 @@ export class ProkerService {
         },
         rab: {
           select: {
-            id: true,
-            nama: true,
-            harga: true,
-            jumlah: true,
-            satuan: true
+            listRab: {
+              select: {
+                id: true,
+                rabId: true,
+                nama: true,
+                harga: true,
+                jumlah: true,
+                satuan: true
+              }
+            }
           }
         },
         notulensi: {

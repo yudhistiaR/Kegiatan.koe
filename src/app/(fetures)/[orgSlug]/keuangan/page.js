@@ -2,6 +2,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DollarSign, Coins, ShieldCheck } from 'lucide-react'
 
 import DetailKeuangan from '@/components/keuangan/DetailKeuangan'
+import PendanaanKegiatan from '@/components/keuangan/PendanaanKegiatan'
+import VerifikasiAnggaran from '@/components/keuangan/VerifikasiAnggaran'
 
 const KeuanganPage = () => {
   return (
@@ -26,9 +28,11 @@ const KeuanganPage = () => {
           <DetailKeuangan />
         </TabsContent>
         <TabsContent value="pendanaan_kegiatan">
-          Change your password here.
+          <PendanaanKegiatan />
         </TabsContent>
-        <TabsContent value="verifikasi">Change your password here.</TabsContent>
+        <TabsContent value="verifikasi">
+          <VerifikasiAnggaran />
+        </TabsContent>
       </Tabs>
     </div>
   )

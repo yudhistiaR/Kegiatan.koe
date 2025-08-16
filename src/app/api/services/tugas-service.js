@@ -12,6 +12,7 @@ export class TugasService {
       select: {
         id: true,
         divisiId: true,
+        orgId: true,
         name: true,
         priority: true,
         description: true,
@@ -57,6 +58,7 @@ export class TugasService {
       select: {
         id: true,
         divisiId: true,
+        orgId: true,
         name: true,
         priority: true,
         description: true,
@@ -97,7 +99,9 @@ export class TugasService {
 
   async CREATE(data) {
     const {
+      orgId,
       divisiId,
+      prokerId,
       name,
       priority,
       description,
@@ -115,7 +119,9 @@ export class TugasService {
     })
 
     const createData = {
+      orgId,
       divisiId,
+      prokerId,
       name,
       priority,
       description,
@@ -127,8 +133,8 @@ export class TugasService {
 
     const anggotaDivisi = await this.prisma.anggotaDivisi.findMany({
       where: {
-        user_id: { in: assignedToIds },
-        divisi_id: divisiId
+        userId: { in: assignedToIds },
+        divisiId: divisiId
       }
     })
 
@@ -155,7 +161,8 @@ export class TugasService {
                 npm: true,
                 username: true,
                 firstName: true,
-                lastName: true
+                lastName: true,
+                fullName: true
               }
             }
           }
@@ -167,6 +174,7 @@ export class TugasService {
   async UPDATE(data) {
     const {
       id,
+      orgId,
       divisiId,
       name,
       priority,
@@ -181,6 +189,7 @@ export class TugasService {
 
     const updateData = {}
 
+    if (orgId !== undefined) updateData.orgId = orgId
     if (divisiId !== undefined) updateData.divisiId = divisiId
     if (name !== undefined) updateData.name = name
     if (priority !== undefined) updateData.priority = priority
@@ -206,8 +215,8 @@ export class TugasService {
       if (tugasInfo) {
         const anggotaDivisi = await this.prisma.anggotaDivisi.findMany({
           where: {
-            user_id: { in: assignedUserIds },
-            divisi_id: tugasInfo.divisiId
+            userId: { in: assignedUserIds },
+            divisiId: tugasInfo.divisiId
           }
         })
 

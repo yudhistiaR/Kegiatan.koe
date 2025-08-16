@@ -13,6 +13,13 @@ export async function GET(_, segmenData) {
   return rabController.GET(divisi_id)
 }
 
-export async function POST(req) {
-  return rabController.CREATE(req)
+export async function POST(req, segmenData) {
+  const params = await segmenData.params
+  const divisi_id = params.divisi_id
+
+  return rabController.CREATE(req, divisi_id)
+}
+
+export async function PATCH(req) {
+  return rabController.UPDATERABSTATUS(req)
 }

@@ -32,68 +32,73 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="w-full max-h-screen space-y-5 flex flex-col">
-      {/* List Counter */}
-      <h1 className="text-3xl font-md font-semibold">Informasi Organisasi</h1>
-      <div className="grid grid-cols-4 grid-rows-1 gap-4">
+    <div className="w-full max-h-screen space-y-5 flex flex-col text-white min-h-screen">
+      <h1 className="text-3xl font-semibold text-white">
+        Informasi Organisasi
+      </h1>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <CounterCard
           icon={<BriefcaseBusiness />}
           counter={data.proker}
           title="Total Program Kerja"
-          colors="bg-blue-100 text-blue-600"
+          colors="bg-[oklch(56.95%_0.165_266.79)] text-white"
         />
         <CounterCard
           counter={data.anggota}
           icon={<User />}
           title="Total Anggota"
-          colors="bg-orange-100 text-orange-600"
+          colors="bg-[oklch(56.95%_0.165_266.79)] text-white"
         />
         <CounterCard
           icon={<CircleCheckBig />}
           counter={data.tugasSelesai}
           title="Total Tugas Selesai"
-          colors="bg-green-100 text-green-600"
+          colors="bg-green-600 text-white"
         />
         <CounterCard
           icon={<SquareX />}
           counter={data.tugasTidakSelesai}
           title="Total Tugas Tidak Selesai"
-          colors="bg-red-100 text-red-600"
+          colors="bg-red-600 text-white"
         />
       </div>
 
-      {/* List Kegiatan Terbaru */}
-      <div className="h-full min-h-full flex gap-4 flex-3">
-        {/* Improved Task Table */}
-        <div className="flex-4 border rounded-lg shadow-sm p-6 flex flex-col gap-4">
-          <h1 className="text-lg font-semibold">Informasi Tugas</h1>
+      <div className="h-full min-h-full flex flex-col lg:flex-row gap-4 flex-3">
+        <div className="flex-4 border border-[oklch(27.27%_0.056_276.3)] rounded-lg shadow-sm flex flex-col gap-4 bg-[oklch(27.27%_0.056_276.3)]">
+          <h1 className="text-lg font-semibold text-white">Informasi Tugas</h1>
           <div className="overflow-hidden">
             <div className="overflow-y-auto max-h-[400px]">
               <table className="w-full">
                 <thead>
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-md">
+                  <tr className="bg-[oklch(56.95%_0.165_266.79)] bg-opacity-20">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-md text-white">
                       No
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-white">
                       Nama Tugas
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-white">
                       Prioritas
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider rounded-tr-md">
+                    <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider rounded-tr-md text-white">
                       Status
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-[oklch(56.95%_0.165_266.79)] divide-opacity-30">
                   {data.infoTugasSelesai.map((item, index) => (
-                    <tr key={item.id}>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm">
+                    <tr
+                      key={item.id}
+                      className="hover:bg-[oklch(56.95%_0.165_266.79)] hover:bg-opacity-10 transition-colors"
+                    >
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-white">
                         {String(index + 1).padStart(2, '0')}
                       </td>
                       <td className="px-4 py-4 text-sm">
-                        <div className="font-medium">{item.name}</div>
+                        <div className="font-medium text-white">
+                          {item.name}
+                        </div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-center">
                         <span
@@ -104,8 +109,10 @@ const DashboardPage = () => {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-center">
                         <div className="flex items-center justify-center gap-1">
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                          <span className="text-sm">{item.status}</span>
+                          <CheckCircle className="w-4 h-4 text-green-400" />
+                          <span className="text-sm text-white">
+                            {item.status}
+                          </span>
                         </div>
                       </td>
                     </tr>
@@ -114,39 +121,38 @@ const DashboardPage = () => {
               </table>
             </div>
           </div>
-          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-            <p className="text-sm text-gray-500 italic flex items-center gap-1">
+          <div className="flex items-center justify-between pt-3 border-t border-[oklch(56.95%_0.165_266.79)] border-opacity-30">
+            <p className="text-sm text-gray-300 italic flex items-center gap-1">
               <CheckCircle className="w-4 h-4" />
               List tugas terbaru yang sudah diselesaikan
             </p>
           </div>
         </div>
 
-        {/* List Ranking Anggota */}
         <div className="h-full min-h-full flex gap-4 flex-2">
-          <div className="flex-1 border rounded-lg p-4 flex flex-col gap-4 bg-gradient-to-br">
+          <div className="flex-1 border border-[oklch(27.27%_0.056_276.3)] rounded-lg p-4 flex flex-col gap-4 bg-[oklch(27.27%_0.056_276.3)]">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-              <h1 className="text-xl font-bold">🏆 Si Rajin</h1>
+              <div className="w-2 h-2 bg-[oklch(56.95%_0.165_266.79)] rounded-full animate-pulse"></div>
+              <h1 className="text-xl font-bold text-white">🏆 Si Rajin</h1>
             </div>
-            <div className="flex-1 overflow-y-auto max-h-[350px] pr-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
+            <div className="flex-1 overflow-y-auto max-h-[350px] pr-2 scrollbar-thin scrollbar-thumb-[oklch(56.95%_0.165_266.79)] scrollbar-track-[oklch(29.46%_0.06_276.82)]">
               <div className="space-y-3">
                 {data.topfiveMember.map((item, index) => (
                   <div
                     key={item.user.id}
                     className={`flex items-center justify-between p-2 rounded-lg transition-all duration-200 hover:shadow-md ${
                       item.rank === 1
-                        ? 'bg-gradient-to-r from-yellow-100 to-yellow-200 border-l-4 border-yellow-500'
+                        ? 'bg-gradient-to-r from-[oklch(56.95%_0.165_266.79)] to-[oklch(56.95%_0.165_266.79)] bg-opacity-80 border-l-4 border-[oklch(56.95%_0.165_266.79)]'
                         : item.rank === 2
-                          ? 'bg-gradient-to-r from-gray-100 to-gray-200 border-l-4 border-gray-500'
+                          ? 'bg-gradient-to-r from-[oklch(56.95%_0.165_266.79)] to-[oklch(56.95%_0.165_266.79)] bg-opacity-60 border-l-4 border-[oklch(56.95%_0.165_266.79)]'
                           : item.rank === 3
-                            ? 'bg-gradient-to-r from-orange-100 to-orange-200 border-l-4 border-orange-600'
-                            : 'bg-white border border-slate-200 hover:border-slate-300'
+                            ? 'bg-gradient-to-r from-[oklch(56.95%_0.165_266.79)] to-[oklch(56.95%_0.165_266.79)] bg-opacity-40 border-l-4 border-[oklch(56.95%_0.165_266.79)]'
+                            : 'bg-[oklch(29.46%_0.06_276.82)] border border-[oklch(56.95%_0.165_266.79)] border-opacity-30 hover:border-opacity-50'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex items-center justify-center w-8 h-8">
-                        {item.rank < 3 ? (
+                        {item.rank <= 3 ? (
                           <Image
                             src={
                               item.rank === 1
@@ -161,16 +167,16 @@ const DashboardPage = () => {
                             className="drop-shadow-sm"
                           />
                         ) : (
-                          <span className="text-lg font-bold text-slate-600">
+                          <span className="text-lg font-bold text-white">
                             #{item.rank}
                           </span>
                         )}
                       </div>
                       <div>
-                        <p className="font-semibold text-slate-800">
+                        <p className="font-semibold text-white">
                           {item.user.username}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-gray-300">
                           {index < 3 ? 'Terajin' : 'Rajin'}
                         </p>
                       </div>
@@ -178,15 +184,15 @@ const DashboardPage = () => {
 
                     <div className="text-right">
                       <div className="flex items-center gap-1">
-                        <span className="text-lg font-bold text-slate-800">
+                        <span className="text-lg font-bold text-white">
                           {item.tugasSelesai * 1000}
                         </span>
-                        <span className="text-xs text-slate-500">pts</span>
+                        <span className="text-xs text-gray-300">pts</span>
                       </div>
                       {index < 3 && (
                         <div className="flex items-center gap-1 mt-1">
-                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                          <span className="text-xs text-green-600 font-medium">
+                          <div className="w-2 h-2 bg-[oklch(56.95%_0.165_266.79)] rounded-full"></div>
+                          <span className="text-xs text-[oklch(56.95%_0.165_266.79)] font-medium">
                             Top 3
                           </span>
                         </div>
@@ -196,9 +202,9 @@ const DashboardPage = () => {
                 ))}
               </div>
             </div>
-            <div className="pt-3 border-t border-slate-200">
-              <p className="text-sm text-slate-500 italic flex items-center gap-1">
-                <span className="text-blue-500">ℹ️</span>
+            <div className="pt-3 border-t border-[oklch(56.95%_0.165_266.79)] border-opacity-30">
+              <p className="text-sm text-gray-300 italic flex items-center gap-1">
+                <span className="text-[oklch(56.95%_0.165_266.79)]">ℹ️</span>
                 Anggota dengan penyelesaian tugas terbanyak
               </p>
             </div>
@@ -209,21 +215,20 @@ const DashboardPage = () => {
   )
 }
 
-// Helper function untuk warna prioritas
 const getPriorityColor = priority => {
   const priorityLower = priority?.toLowerCase() || ''
   switch (priorityLower) {
     case 'tinggi':
     case 'high':
-      return 'bg-red-100 text-red-800 border-red-200'
+      return 'bg-red-600 text-white border-red-500'
     case 'sedang':
     case 'medium':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      return 'bg-yellow-600 text-white border-yellow-500'
     case 'rendah':
     case 'low':
-      return 'bg-green-100 text-green-800 border-green-200'
+      return 'bg-green-600 text-white border-green-500'
     default:
-      return 'bg-gray-100 text-gray-800 border-gray-200'
+      return 'bg-gray-600 text-white border-gray-500'
   }
 }
 
@@ -233,13 +238,13 @@ const CounterCard = ({ icon, counter, title, colors }) => {
   }
 
   return (
-    <div className="w-full flex items-center justify-center gap-4 border py-4 rounded-md">
+    <div className="w-full flex items-center justify-center gap-4 border py-4 rounded-md hover:bg-opacity-80 transition-all">
       <div className="flex items-center gap-2">
         <div className={`p-2 rounded-sm ${colors}`}>{icon}</div>
       </div>
       <div>
-        <p className="text-4xl font-bold">{counter}</p>
-        <p className="font-semibold">{title}</p>
+        <p className="text-4xl font-bold text-white">{counter}</p>
+        <p className="font-semibold text-gray-200">{title}</p>
       </div>
     </div>
   )

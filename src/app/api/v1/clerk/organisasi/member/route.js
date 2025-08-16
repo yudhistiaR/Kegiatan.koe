@@ -8,10 +8,10 @@ const clerk = createClerkClient({
 export async function GET() {
   const { orgId } = await auth()
 
-  const anggotaOrganisasi =
-    await clerk.organizations.getOrganizationMembershipList({
-      organizationId: orgId
-    })
+  const { data } = await clerk.organizations.getOrganizationMembershipList({
+    organizationId: orgId
+  })
 
-  return NextResponse.json(anggotaOrganisasi.publickMetaData, { status: 200 })
+  console.log(data)
+  return NextResponse.json(data, { status: 200 })
 }

@@ -19,6 +19,7 @@ import {
 } from '@dnd-kit/sortable'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@clerk/nextjs'
+import { Plus, Calendar, Users, AlertCircle } from 'lucide-react'
 
 //components
 import { toast } from 'sonner'
@@ -63,9 +64,6 @@ const defaultApiConfig = {
   }
 }
 
-/**
- * Reusable KanbanBoard Component
- */
 export default function KanbanBoard({
   scope = 'divisi',
   divisiId = null,
@@ -113,7 +111,11 @@ export default function KanbanBoard({
     return { fetchUrl, updateUrl, batchUpdateUrl, queryKey }
   }, [scope, divisiId, prokerId, orgId, config])
 
-  const { data: rawData, error } = useQuery({
+  const {
+    data: rawData,
+    error,
+    isLoading
+  } = useQuery({
     queryKey: [...apiUrls.queryKey, apiUrls.fetchUrl],
     queryFn: async () => {
       const req = await fetch(apiUrls.fetchUrl)
@@ -293,7 +295,7 @@ export default function KanbanBoard({
               : 0
         }
 
-        updateTaskMutation.mutate(updatedTask)
+        updateTask(updatedTask)
         return
       }
 
@@ -328,7 +330,7 @@ export default function KanbanBoard({
           order: index
         }))
 
-        batchUpdateTasksMutation.mutate(tasksToUpdate)
+        batchUpdateTasks(tasksToUpdate)
       } else {
         const activeItem = columns[sourceColumn].find(
           item => item.id === active.id
@@ -398,8 +400,17 @@ export default function KanbanBoard({
   // Early return jika prokerId tidak ada untuk scope 'me'
   if (scope === 'me' && !prokerId) {
     return (
-      <div className="flex items-center justify-center h-64 border-2 border-dashed border-gray-300 rounded-lg">
-        <p className="text-gray-500">Pilih Program Kerja terlebih dahulu</p>
+      <div
+        className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg"
+        style={{ borderColor: 'oklch(56.95% 0.165 266.79)' }}
+      >
+        <div className="text-center space-y-2">
+          <AlertCircle
+            className="h-12 w-12 mx-auto"
+            style={{ color: 'oklch(56.95% 0.165 266.79)' }}
+          />
+          <p className="text-white/70">Pilih Program Kerja terlebih dahulu</p>
+        </div>
       </div>
     )
   }
@@ -421,16 +432,52 @@ export default function KanbanBoard({
       onDragCancel={handleDragCancel}
       collisionDetection={closestCenter}
     >
-      <div className="w-full my-4 space-y-4">
-        <div className="w-full flex justify-between items-center">
-          <h1 className="text-2xl font-bold">List Tugas Program Kerja</h1>
+      <div className="w-full my-6 space-y-6">
+        <div className="w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold text-white">Manajemen Tugas</h1>
+            <p className="text-white/70">
+              Kelola dan pantau progress tugas tim Anda
+            </p>
+          </div>
           <Protect permission="tugas:create">
             {showCreateDialog && (
               <CreatedTaskDialog divisiId={divisiId} scope={scope} />
             )}
           </Protect>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        {/* Summary Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          {Object.entries(columns).map(([status, items]) => (
+            <div
+              key={status}
+              className="rounded-lg p-4 border border-white/10"
+              style={{ backgroundColor: 'oklch(27.27% 0.056 276.3)' }}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-white/70">
+                    {getStatusTitle(status)}
+                  </p>
+                  <p className="text-2xl font-bold text-white">
+                    {items?.length || 0}
+                  </p>
+                </div>
+                <div
+                  className="p-2 rounded-lg"
+                  style={{
+                    backgroundColor: 'oklch(56.95% 0.165 266.79)'
+                  }}
+                >
+                  {getStatusIcon(status)}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {Object.entries(columns).map(([status, items]) => (
             <DroppableContainer
               key={status}
@@ -438,6 +485,7 @@ export default function KanbanBoard({
               title={getStatusTitle(status)}
               items={items}
               enableDragAndDrop={enableDragAndDrop}
+              status={status}
             />
           ))}
         </div>
@@ -462,58 +510,106 @@ function getStatusTitle(status) {
   return titles[status] || status
 }
 
-function DroppableContainer({ id, title, items, enableDragAndDrop = true }) {
+function getStatusIcon(status) {
+  const icons = {
+    TODO: <Calendar className="h-5 w-5" style={{ color: 'white' }} />,
+    INPROGRESS: <Users className="h-5 w-5" style={{ color: 'white' }} />,
+    REVIEW: <AlertCircle className="h-5 w-5" style={{ color: 'white' }} />,
+    DONE: <Plus className="h-5 w-5" style={{ color: 'white' }} />
+  }
+  return icons[status] || null
+}
+
+function DroppableContainer({
+  id,
+  title,
+  items,
+  enableDragAndDrop = true,
+  status
+}) {
   const { setNodeRef, isOver } = useDroppable({
     id,
     disabled: !enableDragAndDrop
   })
 
+  const getStatusColor = status => {
+    const colors = {
+      TODO: 'oklch(56.95% 0.165 266.79)',
+      INPROGRESS: 'oklch(65% 0.15 45)',
+      REVIEW: 'oklch(65% 0.15 25)',
+      DONE: 'oklch(65% 0.15 140)'
+    }
+    return colors[status] || 'oklch(56.95% 0.165 266.79)'
+  }
+
   return (
     <div
       ref={setNodeRef}
-      className={`${
+      className={`rounded-xl border transition-all duration-200 ${
         isOver && enableDragAndDrop
-          ? 'bg-background/50 ring-2 ring-accentColor'
-          : 'bg-background'
-      } rounded shadow-md transition-all duration-150 ${
-        !enableDragAndDrop ? 'opacity-90' : ''
-      }`}
+          ? 'ring-2 scale-105 shadow-lg'
+          : 'border-white/10'
+      } ${!enableDragAndDrop ? 'opacity-90' : ''}`}
+      style={{
+        backgroundColor: 'oklch(29.46% 0.06 276.82)',
+        ...(isOver &&
+          enableDragAndDrop && {
+            ringColor: getStatusColor(status),
+            boxShadow: `0 0 20px ${getStatusColor(status)}20`
+          })
+      }}
     >
-      <div className="flex justify-between items-center p-4 mb-4">
-        <h2 className="font-semibold flex items-center gap-2">
-          {title}
-          {!enableDragAndDrop && (
-            <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
-              Read Only
-            </span>
-          )}
-        </h2>
-        <div className="bg-accentColor text-white text-sm font-semibold px-2 py-1 rounded-full">
+      <div className="flex justify-between items-center p-4 border-b border-white/10">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-3 h-3 rounded-full"
+            style={{ backgroundColor: getStatusColor(status) }}
+          ></div>
+          <h2 className="font-semibold text-white flex items-center gap-2">
+            {title}
+            {!enableDragAndDrop && (
+              <span className="text-xs px-2 py-1 rounded-full border border-white/20 text-white/60">
+                Read Only
+              </span>
+            )}
+          </h2>
+        </div>
+        <div
+          className="px-2 py-1 rounded-full text-sm font-medium text-white"
+          style={{ backgroundColor: getStatusColor(status) }}
+        >
           {items?.length || 0}
         </div>
       </div>
 
-      <div className="flex flex-col gap-1 overflow-y-auto min-h-[400px] max-h-[600px] p-2">
-        <SortableContext
-          items={items?.map(item => item.id) || []}
-          strategy={verticalListSortingStrategy}
-          disabled={!enableDragAndDrop}
-        >
-          {items?.map(item => (
-            <DraggableItem
-              key={item.id}
-              id={item.id}
-              data={item}
-              disabled={!enableDragAndDrop}
-            />
-          ))}
-        </SortableContext>
+      <div className="p-4">
+        <div className="space-y-3 min-h-[400px] max-h-[600px] overflow-y-auto">
+          <SortableContext
+            items={items?.map(item => item.id) || []}
+            strategy={verticalListSortingStrategy}
+            disabled={!enableDragAndDrop}
+          >
+            {items?.map(item => (
+              <DraggableItem
+                key={item.id}
+                id={item.id}
+                data={item}
+                disabled={!enableDragAndDrop}
+              />
+            ))}
+          </SortableContext>
 
-        {(!items || items.length === 0) && (
-          <div className="flex-1 flex items-center justify-center text-zinc-500 border-2 border-zinc-500 border-dashed rounded-md">
-            <p>{enableDragAndDrop ? 'Drop task here' : 'No tasks'}</p>
-          </div>
-        )}
+          {(!items || items.length === 0) && (
+            <div className="flex-1 flex flex-col items-center justify-center text-white/50 border-2 border-dashed border-white/20 rounded-lg py-12">
+              <div className="text-center space-y-2">
+                {getStatusIcon(status)}
+                <p className="text-sm">
+                  {enableDragAndDrop ? 'Drop tugas di sini' : 'Tidak ada tugas'}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

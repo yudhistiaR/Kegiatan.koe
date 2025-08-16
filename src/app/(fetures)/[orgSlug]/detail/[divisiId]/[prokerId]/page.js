@@ -34,7 +34,12 @@ const DivisiPage = () => {
         <DivisiDetail />
       </TabsContent>
       <TabsContent value="tugas_divisi">
-        <KanbanBoard scope="divisi" divisiId={divisiId} />
+        <KanbanBoard
+          scope="divisi"
+          divisiId={divisiId}
+          enableDragAndDrop
+          showCreateDialog
+        />
       </TabsContent>
       <TabsContent value="rab_divisi">
         <RabDivisi />

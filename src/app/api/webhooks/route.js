@@ -2,6 +2,12 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { ReponseError } from '../errors/ResponseError'
 import { verifyWebhook } from '@clerk/nextjs/webhooks'
+import { auth, createClerkClient } from '@clerk/nextjs/server'
+import { metadata } from '@/app/layout'
+
+const clerk = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY
+})
 
 export async function POST(req) {
   try {
@@ -104,37 +110,45 @@ export async function POST(req) {
 
     if (eventType === 'user.created' || eventType === 'user.updated') {
       const {
-        id: clerkId,
-        email_addresses,
+        id: userId,
+        username,
         first_name,
         last_name,
-        profile_image_url,
-        gender,
-        birthday,
-        username
+        image_url,
+        email_addresses
       } = evt.data
       const email = email_addresses[0]?.email_address
 
       await prisma.user.upsert({
-        where: { clerkId },
+        where: { id: userId },
         update: {
+          id: userId,
+          email: email,
           username: username,
           firstName: first_name,
           lastName: last_name,
-          profileImg: profile_image_url,
-          tanggal_lahir: birthday,
-          jenis_kelamin: gender
+          profileImg: image_url
         },
         create: {
-          id,
-          clerkId,
-          email,
+          id: userId,
+          email: email,
           username: username,
           firstName: first_name,
           lastName: last_name,
-          profileImg: profile_image_url,
-          tanggal_lahir: birthday,
-          jenis_kelamin: gender
+          profileImg: image_url
+        }
+      })
+
+      await clerk.users.updateUserMetadata(userId, {
+        publicMetadata: {
+          metadata: {
+            id: userId,
+            email: email,
+            username: username,
+            firstName: first_name,
+            lastName: last_name,
+            profileImg: image_url
+          }
         }
       })
 
@@ -147,7 +161,7 @@ export async function POST(req) {
     if (eventType === 'user.deleted') {
       if (deleted) {
         await prisma.user.delete({
-          where: { id: id, clerkId: id }
+          where: { id: id }
         })
 
         return NextResponse.json({ message: 'User deleted' }, { status: 200 })

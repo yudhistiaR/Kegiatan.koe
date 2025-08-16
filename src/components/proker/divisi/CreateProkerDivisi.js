@@ -72,9 +72,9 @@ const DivisiForm = () => {
   } = useForm({
     resolver: zodResolver(DivisiSchema.CREATE),
     defaultValues: {
-      proker_id: prokerId,
-      org_id: orgId,
-      user_id: '',
+      prokerId: prokerId,
+      orgId: orgId,
+      kordinatorId: '',
       name: '',
       description: ''
     }
@@ -85,8 +85,8 @@ const DivisiForm = () => {
 
     data.map(itm =>
       option.push({
-        value: itm.user.clerkId,
-        label: itm.user.username
+        value: itm.user.id,
+        label: itm.user.fullName
       })
     )
 
@@ -125,7 +125,6 @@ const DivisiForm = () => {
   })
 
   const onSubmit = async data => {
-    console.log('Payload:', data)
     mutation.mutate(data)
   }
 
@@ -142,13 +141,13 @@ const DivisiForm = () => {
         {...register('name')}
       />
       <div className="space-y-3">
-        <Label htmlFor="user_id">Kordinator Divisi</Label>
+        <Label htmlFor="kordinatorId">Kordinator Divisi</Label>
         <Controller
-          name="user_id"
+          name="kordinatorId"
           control={control}
           render={({ field }) => (
             <SingleSelect
-              id="user_id"
+              id="kordinatorId"
               isLoading={isLoading && isPending}
               options={data}
               placeholder="Pilih anggota"

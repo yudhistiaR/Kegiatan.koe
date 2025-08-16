@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { useParams } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { formatCurrency } from '@/lib/utils'
 import {
   useReactTable,
@@ -20,20 +20,32 @@ export default function RABTable() {
   const groupByDivision = data => {
     return data.reduce((acc, item) => {
       const divisionName = item.divisi.name
+      const divisionDescription = item.divisi.description
+      const status = item.status
+
       if (!acc[divisionName]) {
         acc[divisionName] = {
-          divisi: item.divisi,
+          divisi: {
+            name: divisionName,
+            description: divisionDescription
+          },
+          status: status,
           items: [],
           total: 0
         }
       }
 
-      const totalHarga = parseInt(item.harga) * parseInt(item.jumlah)
-      acc[divisionName].items.push({
-        ...item,
-        totalHarga
+      // Process each item in listRab and calculate total
+      item.listRab.forEach(rabItem => {
+        const itemTotal = parseInt(rabItem.harga) * parseInt(rabItem.jumlah)
+
+        acc[divisionName].items.push({
+          ...rabItem,
+          totalHarga: itemTotal // Calculate total price per item
+        })
+
+        acc[divisionName].total += itemTotal
       })
-      acc[divisionName].total += totalHarga
 
       return acc
     }, {})
@@ -50,12 +62,34 @@ export default function RABTable() {
       const req = await fetch(`/api/v1/proker/${orgId}/${prokerId}/rab`)
       const response = await req.json()
       return Array.isArray(response) ? response : response.data || []
-    },
-    select: groupByDivision
+    }
   })
 
-  // Pastikan data sudah tersedia sebelum digunakan
-  const groupedData = useMemo(() => rabProker || {}, [rabProker])
+  const { mutate: updateStatusRab } = useMutation({
+    queryKey: ['update-rab-proker', orgId, prokerId],
+    queryFn: async data => {
+      const req = await fetch(`/api/v1/proker/${orgId}/${prokerId}/rab`, {
+        body: JSON.stringify(data),
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.message)
+      }
+
+      return res.json()
+    }
+  })
+
+  // Group data using the updated function
+  const groupedData = useMemo(() => {
+    if (!rabProker) return {}
+    return groupByDivision(rabProker)
+  }, [rabProker])
 
   // Hitung grand total dari grouped data
   const grandTotal = useMemo(() => {
@@ -109,6 +143,14 @@ export default function RABTable() {
     [columnHelper]
   )
 
+  // LoadStatus - move to top level
+  if (isLoading || isPending) {
+    return <LoadingState />
+  }
+  if (error) {
+    return <ErrorState error={error} />
+  }
+
   // Komponen tabel untuk setiap divisi
   const DivisionTable = ({ divisionName, divisionData }) => {
     const table = useReactTable({
@@ -117,12 +159,18 @@ export default function RABTable() {
       getCoreRowModel: getCoreRowModel()
     })
 
-    //LoadStatus
-    if (isLoading | isPending) {
-      return <LoadingState />
-    }
-    if (error) {
-      return <ErrorState error={error} />
+    // Function to get status badge styling
+    const getStatusBadge = status => {
+      switch (status) {
+        case 'DRAF':
+          return 'px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full'
+        case 'PENDING':
+          return 'px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full'
+        case 'VERIFIED':
+          return 'px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full'
+        default:
+          return 'px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded-full'
+      }
     }
 
     return (
@@ -133,6 +181,9 @@ export default function RABTable() {
             <div className="flex items-center gap-3">
               <div className="w-3 h-3 bg-accentColor rounded-full"></div>
               <h3 className="text-lg font-semibold">{divisionName}</h3>
+              <span className={getStatusBadge(divisionData.status)}>
+                {divisionData.status}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <span className="px-3 py-1 bg-accentColor text-white text-sm font-medium rounded-full">
@@ -200,9 +251,7 @@ export default function RABTable() {
                                 ? 'text-right font-medium'
                                 : 'text-center'
                         } ${
-                          cell.column.id === 'totalHarga'
-                            ? 'font-semibold text-blue-500'
-                            : ''
+                          cell.column.id === 'totalHarga' ? 'font-semibold' : ''
                         }`}
                       >
                         {flexRender(
@@ -224,7 +273,7 @@ export default function RABTable() {
                   >
                     Subtotal {divisionName}:
                   </td>
-                  <td className="px-6 py-4 text-right font-bold text-lg text-blue-600">
+                  <td className="px-6 py-4 text-right font-bold text-lg">
                     {formatCurrency(divisionData.total)}
                   </td>
                 </tr>
@@ -248,7 +297,7 @@ export default function RABTable() {
             <p>Daftar anggaran berdasarkan divisi</p>
           </div>
           <div className="text-right">
-            <div className="text-4xl font-bold text-blue-600 mb-1">
+            <div className="text-4xl font-bold  mb-1">
               {formatCurrency(grandTotal)}
             </div>
             <p className="text-sm">Total Anggaran</p>
@@ -262,7 +311,7 @@ export default function RABTable() {
           <div className="flex items-center">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <svg
-                className="w-6 h-6 text-blue-600"
+                className="w-6 h-6 "
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

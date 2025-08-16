@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 export class TaskSchema {
   static CREATE = z.object({
+    orgId: z.string().min(1),
     divisiId: z.string().min(1),
     prokerId: z.string().min(1),
     status: z.string().min(1),

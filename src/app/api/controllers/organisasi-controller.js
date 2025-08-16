@@ -16,7 +16,7 @@ export class OrganisasiController {
       if (orgId !== org_id)
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
 
-      const data = await this.organisasiService.organisasiMembers(org_id)
+      const data = await this.organisasiService.organisasiMembers(orgId)
 
       return NextResponse.json(data, { status: 200 })
     } catch (error) {

@@ -95,7 +95,7 @@ const CardListDivisi = () => {
     return <ErrorState error={error} />
   }
 
-  if (!data) {
+  if (!data || !Array.isArray(data) || data.length <= 0) {
     return <NotDataState />
   }
 
@@ -119,7 +119,7 @@ const CardListDivisi = () => {
               Kordinator :{' '}
               {divisi.anggota.map(detail => {
                 if (detail.jenis_jabatan === 'KORDINATOR')
-                  return detail.user.username
+                  return detail.user.fullName
               })}
             </CardDescription>
           </CardHeader>

@@ -11,8 +11,32 @@ export class RabController {
 
   async GETALL() {
     try {
-      const data = await this.rabService.GETALL()
+      const { orgId } = this.clerk()
+
+      const data = await this.rabService.GETALL(orgId)
       return NextResponse.json(data, { status: 200 })
+    } catch (error) {
+      return ReponseError(error)
+    }
+  }
+
+  async UPDATEREVISISTATUS(data) {
+    try {
+      const parseData = await data.json()
+
+      const response = await this.rabService.updateRevisiStatus(parseData)
+      return NextResponse.json(response, { status: 200 })
+    } catch (error) {
+      return ReponseError(error)
+    }
+  }
+
+  async UPDATERABSTATUS(data) {
+    try {
+      const parseData = await data.json()
+
+      const response = await this.rabService.updateRabStatus(parseData)
+      return NextResponse.json(response, { status: 200 })
     } catch (error) {
       return ReponseError(error)
     }
@@ -27,11 +51,11 @@ export class RabController {
     }
   }
 
-  async CREATE(data) {
+  async CREATE(data, divisiId) {
     const parseData = await data.json()
 
     try {
-      const data = await this.rabService.CREATE(parseData)
+      const data = await this.rabService.CREATE(parseData, divisiId)
       return NextResponse.json(data, { status: 200 })
     } catch (error) {
       return ReponseError(error)

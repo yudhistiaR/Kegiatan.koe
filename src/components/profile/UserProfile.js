@@ -2,7 +2,7 @@
 
 import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query'
 import { useForm, Controller } from 'react-hook-form'
-import { useUser } from '@clerk/nextjs'
+import { useAuth, useUser } from '@clerk/nextjs'
 import Image from 'next/image'
 
 import { Input } from '@/components/ui/input'
@@ -12,6 +12,7 @@ import { PenLine } from 'lucide-react'
 import { toast } from 'sonner'
 
 const UserProfile = () => {
+  const { userId } = useAuth()
   const { user } = useUser()
 
   const queryClient = useQueryClient()
@@ -21,7 +22,7 @@ const UserProfile = () => {
     isLoading,
     isPending
   } = useQuery({
-    queryKey: ['me', user?.id],
+    queryKey: ['me', userId],
     queryFn: async () => {
       const res = await fetch(`/api/v1/clerk/user`)
       return res.json()
@@ -37,23 +38,23 @@ const UserProfile = () => {
       return req.json()
     },
     onMutate: async newData => {
-      await queryClient.cancelQueries({ queryKey: ['me', user?.id] })
+      await queryClient.cancelQueries({ queryKey: ['me', userId] })
 
-      const previousData = queryClient.getQueryData(['me', user?.id])
+      const previousData = queryClient.getQueryData(['me', userId])
 
-      queryClient.setQueryData(['me', user.id], newData)
+      queryClient.setQueryData(['me', userId], newData)
 
       return { previousData }
     },
     onSuccess: () => {
       toast.success('Profile updated')
-      queryClient.invalidateQueries({ queryKey: ['me', user?.id] })
+      queryClient.invalidateQueries({ queryKey: ['me', userId] })
     },
     onError: () => {
       toast.error('Profile not updated')
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['me', user?.id] })
+      queryClient.invalidateQueries({ queryKey: ['me', userId] })
     }
   })
 
@@ -91,9 +92,6 @@ const UserProfile = () => {
                 height={200}
               />
             </div>
-            <h3 className="bg-accentColor text-accent w-full text-center font-bold shadow-lg">
-              {userProfile?.label}
-            </h3>
           </div>
           <div className="flex-1">
             <form
@@ -101,20 +99,16 @@ const UserProfile = () => {
               onSubmit={handleSubmit(onSubmit)}
             >
               <div className="grid gap-3">
-                <Label>Username</Label>
-                <Input
-                  placeholder="Username"
-                  {...register('username')}
-                  disabled
-                />
+                <Label>Nama</Label>
+                <Input placeholder="Nama Lengkap" {...register('fullName')} />
               </div>
               <div className="grid gap-3">
                 <Label>NPM/NIM</Label>
-                <Input placeholder="Nama Depan" {...register('npm')} />
+                <Input placeholder="nim/npm" {...register('npm')} />
               </div>
               <div className="grid gap-3">
                 <Label>Asal Kampus</Label>
-                <Input placeholder="Alas Kampus" {...register('universitas')} />
+                <Input placeholder="Asal Kampus" {...register('universitas')} />
               </div>
               <div className="grid gap-3">
                 <Label>No Telpon</Label>
