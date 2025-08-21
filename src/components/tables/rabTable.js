@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { useParams } from 'next/navigation'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { formatCurrency } from '@/lib/utils'
 import {
   useReactTable,
@@ -62,26 +62,6 @@ export default function RABTable() {
       const req = await fetch(`/api/v1/proker/${orgId}/${prokerId}/rab`)
       const response = await req.json()
       return Array.isArray(response) ? response : response.data || []
-    }
-  })
-
-  const { mutate: updateStatusRab } = useMutation({
-    queryKey: ['update-rab-proker', orgId, prokerId],
-    queryFn: async data => {
-      const req = await fetch(`/api/v1/proker/${orgId}/${prokerId}/rab`, {
-        body: JSON.stringify(data),
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.message)
-      }
-
-      return res.json()
     }
   })
 

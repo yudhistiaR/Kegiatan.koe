@@ -111,11 +111,7 @@ export default function KanbanBoard({
     return { fetchUrl, updateUrl, batchUpdateUrl, queryKey }
   }, [scope, divisiId, prokerId, orgId, config])
 
-  const {
-    data: rawData,
-    error,
-    isLoading
-  } = useQuery({
+  const { data: rawData, error } = useQuery({
     queryKey: [...apiUrls.queryKey, apiUrls.fetchUrl],
     queryFn: async () => {
       const req = await fetch(apiUrls.fetchUrl)

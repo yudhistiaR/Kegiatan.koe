@@ -289,7 +289,7 @@ const CreateRab = () => {
         )
       })
     ],
-    [handleDelete, isDeleting, isLocked]
+    [handleDelete, isDeleting, isLocked, columnHelper]
   )
 
   const table = useReactTable({
