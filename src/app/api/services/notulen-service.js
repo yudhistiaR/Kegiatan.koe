@@ -65,7 +65,11 @@ export class NotulenService {
           select: {
             id: true,
             title: true,
-            author: true,
+            ketua_pelaksana: {
+              select: {
+                fullName: true
+              }
+            },
             description: true
           }
         },

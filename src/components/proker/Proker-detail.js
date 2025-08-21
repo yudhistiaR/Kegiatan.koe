@@ -24,7 +24,6 @@ import {
 } from '@/components/LoadState/LoadStatus'
 
 const DetailProker = ({ orgId, prokerId }) => {
-  // TanStack Query
   const {
     data: rawData,
     isPending,
@@ -39,12 +38,15 @@ const DetailProker = ({ orgId, prokerId }) => {
       }
       return res.json()
     },
-    enabled: !!orgId && !!prokerId // Only run query if orgId and prokerId exist
+    enabled: !!orgId && !!prokerId
   })
 
-  // Extract data from array (API returns array with single object)
   const data = rawData?.[0]
-  // TanStack Table setup for RAB
+
+  const allRabItems = useMemo(() => {
+    return data?.rab?.flatMap(group => group.listRab) || []
+  }, [data])
+
   const columnHelper = createColumnHelper()
 
   const rabColumns = useMemo(
@@ -79,12 +81,11 @@ const DetailProker = ({ orgId, prokerId }) => {
   )
 
   const rabTable = useReactTable({
-    data: data?.rab || [],
+    data: allRabItems,
     columns: rabColumns,
     getCoreRowModel: getCoreRowModel()
   })
 
-  // TanStack Table setup for Divisi
   const divisiColumns = useMemo(
     () => [
       columnHelper.accessor('name', {
@@ -105,42 +106,37 @@ const DetailProker = ({ orgId, prokerId }) => {
     getCoreRowModel: getCoreRowModel()
   })
 
-  // Loading state
   if (isLoading || isPending) {
     return <LoadingState />
   }
 
-  // Error state
   if (error) {
     return <ErrorState error={error} />
   }
 
-  // No data state
   if (!data) {
     return <NotDataState />
   }
 
-  // Calculate statistics
   const totalDivisi = data.divisi?.length || 0
   const totalTugas = data.tugas?.length || 0
-
-  // Calculate total RAB properly - convert string to number and multiply by quantity
-  const totalRAB =
-    data.rab?.reduce((sum, item) => {
-      const harga = parseFloat(item.harga) || 0
-      const jumlah = parseFloat(item.jumlah) || 1
-      return sum + harga * jumlah
-    }, 0) || 0
-
   const totalNotulensi = data.notulensi?.length || 0
 
-  // Calculate progress based on completed tasks
+  const totalRAB = useMemo(
+    () =>
+      allRabItems.reduce((sum, item) => {
+        const harga = parseFloat(item.harga) || 0
+        const jumlah = parseFloat(item.jumlah) || 1
+        return sum + harga * jumlah
+      }, 0),
+    [allRabItems]
+  )
+
   const completedTasks =
     data.tugas?.filter(task => task.status === 'DONE').length || 0
   const progressPercentage =
     totalTugas > 0 ? Math.round((completedTasks / totalTugas) * 100) : 0
 
-  // Determine program status
   const getProgramStatus = () => {
     if (totalTugas === 0)
       return { label: 'Belum Ada Tugas', color: 'bg-gray-100 text-gray-800' }
@@ -158,16 +154,11 @@ const DetailProker = ({ orgId, prokerId }) => {
   return (
     <div className="min-h-screen pt-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Detail Program Kerja</h1>
         </div>
-
-        {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Main Info */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Title & Description Card */}
             <div className="rounded-lg shadow-sm border p-6">
               <div className="mb-4">
                 <h2 className="text-2xl font-bold mb-2">{data.title}</h2>
@@ -177,14 +168,11 @@ const DetailProker = ({ orgId, prokerId }) => {
                   <span>{data.ketua_pelaksana.fullName}</span>
                 </div>
               </div>
-
               <div className="border-t pt-4">
                 <h3 className="font-semibold mb-3 ">Deskripsi</h3>
                 <p className=" leading-relaxed">{data.description}</p>
               </div>
             </div>
-
-            {/* Statistics Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="rounded-lg shadow-sm border p-4">
                 <div className="flex items-center gap-3">
@@ -197,7 +185,6 @@ const DetailProker = ({ orgId, prokerId }) => {
                   </div>
                 </div>
               </div>
-
               <div className="rounded-lg shadow-sm border p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-green-100 rounded-lg">
@@ -209,7 +196,6 @@ const DetailProker = ({ orgId, prokerId }) => {
                   </div>
                 </div>
               </div>
-
               <div className="rounded-lg shadow-sm border p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-purple-100 rounded-lg">
@@ -223,7 +209,6 @@ const DetailProker = ({ orgId, prokerId }) => {
                   </div>
                 </div>
               </div>
-
               <div className="rounded-lg shadow-sm border p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-orange-100 rounded-lg">
@@ -236,8 +221,6 @@ const DetailProker = ({ orgId, prokerId }) => {
                 </div>
               </div>
             </div>
-
-            {/* Divisi Section */}
             {data.divisi && data.divisi.length > 0 && (
               <div className="rounded-lg shadow-sm border p-6">
                 <h3 className="font-semibold mb-4">Divisi</h3>
@@ -280,9 +263,7 @@ const DetailProker = ({ orgId, prokerId }) => {
                 </div>
               </div>
             )}
-
-            {/* RAB Section */}
-            {data.rab && data.rab.length > 0 && (
+            {allRabItems.length > 0 && (
               <div className="rounded-lg shadow-sm border p-6">
                 <h3 className="font-semibold mb-4">
                   Rencana Anggaran Biaya (RAB)
@@ -335,16 +316,12 @@ const DetailProker = ({ orgId, prokerId }) => {
               </div>
             )}
           </div>
-
-          {/* Right Column - Timeline & Info */}
           <div className="space-y-6">
-            {/* Timeline Card */}
             <div className="rounded-lg shadow-sm border p-6">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <Clock size={20} />
                 Timeline
               </h3>
-
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -353,7 +330,6 @@ const DetailProker = ({ orgId, prokerId }) => {
                     <p className="text-sm">{converDateTime(data.start)}</p>
                   </div>
                 </div>
-
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                   <div>
@@ -361,7 +337,6 @@ const DetailProker = ({ orgId, prokerId }) => {
                     <p className="text-sm">{converDateTime(data.end)}</p>
                   </div>
                 </div>
-
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <div>
@@ -371,8 +346,6 @@ const DetailProker = ({ orgId, prokerId }) => {
                 </div>
               </div>
             </div>
-
-            {/* Status Card */}
             <div className="rounded-lg shadow-sm border p-6">
               <h3 className="font-semibold mb-4">Status Program</h3>
               <div className="space-y-3">
