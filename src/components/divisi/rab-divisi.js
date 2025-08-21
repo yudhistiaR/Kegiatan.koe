@@ -47,7 +47,6 @@ import {
   Receipt,
   Calculator,
   Lock,
-  Loader2,
   MessageSquareWarning,
   ListRestart
 } from 'lucide-react'
@@ -86,7 +85,7 @@ const CreateRab = () => {
     isError,
     error
   } = useQuery({
-    queryKey: ['rab', divisiId],
+    queryKey: ['rab-divisi', divisiId],
     queryFn: async () => {
       const response = await fetch(`/api/v1/proker/divisi/${divisiId}/rab`)
       if (!response.ok) {

@@ -21,8 +21,6 @@ const DetailKeuangan = () => {
     }
   })
 
-  console.log(data)
-
   return (
     <div className="w-full h-full">
       <div className="flex justify-between items-center h-[100px] bg-accentColor p-4 rounded-md text-3xl font-bold mb-4">

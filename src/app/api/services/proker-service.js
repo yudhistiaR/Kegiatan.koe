@@ -178,7 +178,7 @@ export class ProkerService {
       data: {
         ...data,
         start: new Date(start),
-        end: end ? new Date(end) : prisma.skip
+        end: end ? new Date(end) : undefined
       }
     })
   }

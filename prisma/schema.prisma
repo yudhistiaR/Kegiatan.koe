@@ -58,7 +58,6 @@ model User {
 
   anggotaDivisi     AnggotaDivisi[]
   organisasi_member Organisasi_member[]
-  keuangan          Keuangan[]
   Proker            Proker[]
 
   createdAt DateTime @default(now())
@@ -67,21 +66,22 @@ model User {
 }
 
 model Proker {
-  id               String      @id @default(uuid())
+  id               String       @id @default(uuid())
   orgId            String
   ketuaPelaksanaId String
-  title            String      @map("proker_name")
-  description      String      @map("proker_desc") @db.Text
+  title            String       @map("proker_name")
+  description      String       @map("proker_desc") @db.Text
   divisi           Divisi[]
-  start            DateTime    @map("proker_start")
-  end              DateTime?   @map("proker_end")
-  created_at       DateTime    @default(now()) @map("created_at")
+  start            DateTime     @map("proker_start")
+  end              DateTime?    @map("proker_end")
+  created_at       DateTime     @default(now()) @map("created_at")
   tugas            Tugas[]
   rab              rab[]
   notulensi        notulensi[]
+  Pendanaan        SumberDana[]
+  organisasi       Organisasi   @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
-  organisasi      Organisasi @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  ketua_pelaksana User       @relation(fields: [ketuaPelaksanaId], references: [id], onDelete: Cascade)
+  ketua_pelaksana User @relation(fields: [ketuaPelaksanaId], references: [id], onDelete: Cascade)
 
   @@map("program_kerja")
 }
@@ -94,7 +94,7 @@ model Organisasi {
   image_url         String              @db.Text
   notulensi         notulensi[]
   rab               rab[]
-  keuangan          Keuangan[]
+  Pendanaan         SumberDana[]
   Proker            Proker[]
   Divisi            Divisi[]
   Tugas             Tugas[]
@@ -198,16 +198,19 @@ model ListRab {
   rabId String?
 }
 
-model Keuangan {
-  id         String    @id @unique @default(uuid())
-  orgId      String
-  userId     String
-  jumlah     String?
-  created_at DateTime? @map("created_at")
-  updated_at DateTime? @map("updated_at")
+model SumberDana {
+  id       String              @id @unique @default(uuid())
+  orgId    String
+  prokerId String
+  sumber   String?
+  type     String?
+  jumlah   Decimal
+  kontak   String?
+  catatan  String?             @db.Text
+  status   RAB_STATUS_VERIFIED @default(value: PENDING)
 
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   organisasi Organisasi @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  proker     Proker     @relation(fields: [prokerId], references: [id], onDelete: Cascade)
 }
 
 model notulensi {

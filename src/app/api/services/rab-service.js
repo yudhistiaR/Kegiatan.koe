@@ -19,7 +19,6 @@ export class RabService {
   }
 
   async updateRevisiStatus(data) {
-    console.log(data)
     return await this.prisma.rab.update({
       where: {
         id: data.id
