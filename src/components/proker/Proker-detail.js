@@ -23,7 +23,7 @@ import {
   ErrorState
 } from '@/components/LoadState/LoadStatus'
 
-const DetailProkerMockup = ({ orgId, prokerId }) => {
+const DetailProker = ({ orgId, prokerId }) => {
   // TanStack Query
   const {
     data: rawData,
@@ -174,7 +174,7 @@ const DetailProkerMockup = ({ orgId, prokerId }) => {
                 <div className="flex items-center gap-2">
                   <User size={16} />
                   <span className="font-medium">Ketua Pelaksana:</span>
-                  <span>{data.author}</span>
+                  <span>{data.ketua_pelaksana.fullName}</span>
                 </div>
               </div>
 
@@ -409,4 +409,4 @@ const DetailProkerMockup = ({ orgId, prokerId }) => {
   )
 }
 
-export default DetailProkerMockup
+export default DetailProker

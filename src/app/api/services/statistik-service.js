@@ -7,7 +7,7 @@ export class StatistikService {
     //Jumlah proker organisai
     const jumlahProker = await this.prisma.proker.count({
       where: {
-        org_id: orgId
+        orgId: orgId
       }
     })
 
@@ -23,7 +23,7 @@ export class StatistikService {
       where: {
         status: 'DONE',
         proker: {
-          org_id: orgId
+          orgId: orgId
         }
       }
     })
@@ -34,7 +34,7 @@ export class StatistikService {
           in: ['TODO', 'INPROGRESS', 'REVIEW']
         },
         proker: {
-          org_id: orgId
+          orgId: orgId
         }
       }
     })
@@ -45,7 +45,7 @@ export class StatistikService {
           in: ['DONE']
         },
         proker: {
-          org_id: orgId
+          orgId: orgId
         }
       }
     })
@@ -74,7 +74,7 @@ export class StatistikService {
       where: {
         status: 'DONE',
         proker: {
-          org_id: orgId
+          orgId: orgId
         }
       },
       include: {

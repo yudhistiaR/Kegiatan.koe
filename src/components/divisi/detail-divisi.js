@@ -13,9 +13,10 @@ import { useMemo } from 'react'
 import Image from 'next/image'
 import { formatDate } from '@/helpers/formatedate'
 import { Badge } from '@/components/ui/badge'
-import { Link as LinkIcon, Users, UserPlus } from 'lucide-react'
+import { LinkIcon, Users, UserPlus } from 'lucide-react'
 import Link from 'next/link'
 import {
+  TooltipProvider,
   Tooltip,
   TooltipContent,
   TooltipTrigger
@@ -44,7 +45,6 @@ import { buttonVariants } from '../ui/button'
 import { useAuth } from '@clerk/nextjs'
 import { toast } from 'sonner'
 import { LoadingState, ErrorState } from '@/components/LoadState/LoadStatus'
-
 import { Protect } from '@clerk/nextjs'
 
 const columnHelper = createColumnHelper()
@@ -60,33 +60,35 @@ function DetailDivisi() {
         cell: info => (
           <div className="flex justify-center">
             <Image
-              src={info.getValue()}
+              src={info.getValue() || '/placeholder.svg'}
               alt="foto"
               width={40}
               height={40}
-              className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+              className="w-10 h-10 rounded-full object-cover border-2 border-[oklch(56.95%_0.165_266.79)]"
             />
           </div>
         )
       }),
-      columnHelper.accessor(row => row.user.username, {
-        id: 'username',
-        header: 'Username',
+      columnHelper.accessor(row => row.user.fullName, {
+        id: 'fullName',
+        header: 'Nama',
         cell: info => (
-          <div className="font-medium dark:text-gray-100">
-            {info.getValue()}
-          </div>
+          <div className="font-medium text-white">{info.getValue()}</div>
         )
       }),
       columnHelper.accessor(row => row.user.npm, {
         id: 'npm',
         header: 'NPM/NIM',
-        cell: info => <div className="text-sm">{info.getValue()}</div>
+        cell: info => (
+          <div className="text-sm text-gray-300">{info.getValue()}</div>
+        )
       }),
       columnHelper.accessor(row => row.user.universitas, {
         id: 'universitas',
         header: 'Universitas',
-        cell: info => <div className="text-sm">{info.getValue()}</div>
+        cell: info => (
+          <div className="text-sm text-gray-300">{info.getValue()}</div>
+        )
       }),
       columnHelper.accessor(row => row.user.telpon, {
         id: 'telpon',
@@ -100,7 +102,7 @@ function DetailDivisi() {
             <Link
               target="_blank"
               href={encodeURL}
-              className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800 text-green-700 dark:text-green-300 rounded-md transition-colors duration-200 text-sm"
+              className="inline-flex items-center gap-2 px-3 py-1 bg-[oklch(56.95%_0.165_266.79)]/20 hover:bg-[oklch(56.95%_0.165_266.79)]/30 text-[oklch(56.95%_0.165_266.79)] border border-[oklch(56.95%_0.165_266.79)]/30 rounded-md transition-colors duration-200 text-sm"
             >
               <LinkIcon size={14} />
               <span className="hidden sm:inline">{info.getValue()}</span>
@@ -113,7 +115,10 @@ function DetailDivisi() {
         id: 'jenis_kelamin',
         header: 'Gender',
         cell: info => (
-          <Badge variant="outline" className="text-xs text-white">
+          <Badge
+            variant="outline"
+            className="text-xs text-white border-[oklch(56.95%_0.165_266.79)]/30 bg-[oklch(56.95%_0.165_266.79)]/10"
+          >
             {info.getValue()}
           </Badge>
         )
@@ -122,7 +127,9 @@ function DetailDivisi() {
         id: 'created_at',
         header: 'Bergabung',
         cell: info => (
-          <div className="text-sm">{formatDate(info.getValue())}</div>
+          <div className="text-sm text-gray-300">
+            {formatDate(info.getValue())}
+          </div>
         )
       }),
       columnHelper.accessor('jenis_jabatan', {
@@ -132,7 +139,11 @@ function DetailDivisi() {
             variant={
               info.getValue() === 'KORDINATOR' ? 'destructive' : 'secondary'
             }
-            className="font-medium"
+            className={`font-medium ${
+              info.getValue() === 'KORDINATOR'
+                ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                : 'bg-[oklch(56.95%_0.165_266.79)]/20 text-[oklch(56.95%_0.165_266.79)] border-[oklch(56.95%_0.165_266.79)]/30'
+            }`}
           >
             {info.getValue()}
           </Badge>
@@ -173,47 +184,49 @@ function DetailDivisi() {
   }
 
   return (
-    <div className="px-4 py-6 space-y-6">
+    <div className="min-h-screen mt-4 space-y-6">
       {/* Header Section */}
-      {data?.map(divisi => (
-        <Card key={divisi.id} className="shadow-sm">
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-              <div className="space-y-2">
-                <CardTitle className="text-2xl font-bold dark:text-gray-100">
-                  {divisi.name}
-                </CardTitle>
-                <CardDescription className="text-base leading-relaxed max-w-2xl">
-                  {divisi.description}
-                </CardDescription>
+      <TooltipProvider>
+        {data?.map(divisi => (
+          <Card key={divisi.id} className="shadow-lg border">
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div className="space-y-2">
+                  <CardTitle className="text-2xl font-bold text-white">
+                    {divisi.name}
+                  </CardTitle>
+                  <CardDescription className="text-base leading-relaxed max-w-2xl text-gray-300">
+                    {divisi.description}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button>
+                        <Users size={16} />
+                        <span className="font-semibold">
+                          {divisi.anggota.length}
+                        </span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Total anggota divisi</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <Protect permission="divisi:edit">
+                    <TambahAnggota divisiId={divisi.id} />
+                  </Protect>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button>
-                      <Users size={16} />
-                      <span className="font-semibold">
-                        {divisi.anggota.length}
-                      </span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Total anggota divisi</p>
-                  </TooltipContent>
-                </Tooltip>
-                <Protect permission="divisi:edit">
-                  <TambahAnggota divisiId={divisi.id} />
-                </Protect>
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
-      ))}
+            </CardHeader>
+          </Card>
+        ))}
+      </TooltipProvider>
 
       {/* Members Table Section */}
-      <Card className="shadow-sm">
+      <Card className="shadow-lg border">
         <CardHeader>
-          <CardTitle className="text-xl font-semibold flex items-center gap-2">
+          <CardTitle className="text-xl font-semibold flex items-center gap-2 text-white">
             <Users size={24} />
             Daftar Anggota
           </CardTitle>
@@ -224,11 +237,14 @@ function DetailDivisi() {
             <table className="w-full">
               <thead>
                 {table.getHeaderGroups().map(headerGroup => (
-                  <tr key={headerGroup.id} className="border-b">
+                  <tr
+                    key={headerGroup.id}
+                    className="border-b border-[oklch(56.95%_0.165_266.79)]/20"
+                  >
                     {headerGroup.headers.map(header => (
                       <th
                         key={header.id}
-                        className="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider"
+                        className="px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider text-[oklch(56.95%_0.165_266.79)]"
                       >
                         {flexRender(
                           header.column.columnDef.header,
@@ -240,12 +256,12 @@ function DetailDivisi() {
                 ))}
               </thead>
 
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="divide-y divide-[oklch(56.95%_0.165_266.79)]/10">
                 {table.getRowModel().rows.length > 0 ? (
                   table.getRowModel().rows.map(row => (
                     <tr
                       key={row.id}
-                      className={`hover:bg-accentColor/80 transition-colors duration-150`}
+                      className="hover:bg-[oklch(56.95%_0.165_266.79)]/10 transition-colors duration-150"
                     >
                       {row.getVisibleCells().map(cell => (
                         <td
@@ -266,11 +282,16 @@ function DetailDivisi() {
                       colSpan={columns.length}
                       className="px-4 py-12 text-center"
                     >
-                      <div className="flex flex-col items-center gap-3 text-gray-500 dark:text-gray-400">
-                        <Users size={48} className="opacity-50" />
+                      <div className="flex flex-col items-center gap-3 text-gray-400">
+                        <Users
+                          size={48}
+                          className="opacity-50 text-[oklch(56.95%_0.165_266.79)]"
+                        />
                         <div>
-                          <p className="font-medium">Belum ada anggota</p>
-                          <p className="text-sm">
+                          <p className="font-medium text-white">
+                            <p className="text-sm text-gray-300">
+                              Belum ada anggota
+                            </p>
                             Tambahkan anggota untuk mulai berkolaborasi
                           </p>
                         </div>
@@ -293,7 +314,7 @@ const TambahAnggota = ({ divisiId }) => {
 
   const { handleSubmit, control, reset } = useForm({
     defaultValues: {
-      divisi_id: divisiId,
+      divisiId: divisiId,
       members: []
     }
   })
@@ -302,8 +323,8 @@ const TambahAnggota = ({ divisiId }) => {
     const option = []
     data.map(itm =>
       option.push({
-        value: itm.user.clerkId,
-        label: itm.user.username
+        value: itm.user.id,
+        label: itm.user.fullName
       })
     )
     return option
@@ -357,20 +378,21 @@ const TambahAnggota = ({ divisiId }) => {
       <AlertDialogTrigger
         className={buttonVariants({
           size: 'sm',
-          className: 'shadow-sm hover:shadow-md transition-shadow duration-200'
+          className:
+            'shadow-sm hover:shadow-md transition-shadow duration-200 bg-[oklch(56.95%_0.165_266.79)] hover:bg-[oklch(56.95%_0.165_266.79)]/80 text-white'
         })}
       >
         <UserPlus size={16} className="mr-2" />
         Tambah Anggota
       </AlertDialogTrigger>
 
-      <AlertDialogContent className="sm:max-w-md">
+      <AlertDialogContent className="sm:max-w-md bg-[oklch(27.27%_0.056_276.3)] border-[oklch(56.95%_0.165_266.79)]/20">
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
+          <AlertDialogTitle className="flex items-center gap-2 text-white">
             <UserPlus size={20} />
             Tambah Anggota Divisi
           </AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogDescription className="text-gray-300">
             Pilih anggota organisasi yang akan bertugas di divisi ini. Anda
             dapat memilih beberapa anggota sekaligus.
           </AlertDialogDescription>
@@ -400,15 +422,16 @@ const TambahAnggota = ({ divisiId }) => {
           />
 
           <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogCancel className="bg-gray-600 hover:bg-gray-700 text-white border-gray-500">
+              Batal
+            </AlertDialogCancel>
             <AlertDialogAction
               type="submit"
               disabled={mutation.isPending}
-              className="min-w-24"
+              className="min-w-24 bg-[oklch(56.95%_0.165_266.79)] hover:bg-[oklch(56.95%_0.165_266.79)]/80 text-white"
             >
               {mutation.isPending ? (
                 <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   <span>Menambah...</span>
                 </div>
               ) : (

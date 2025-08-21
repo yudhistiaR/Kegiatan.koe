@@ -1,3 +1,4 @@
+import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { auth, createClerkClient } from '@clerk/nextjs/server'
 
@@ -19,10 +20,10 @@ export async function GET() {
   }
 
   const userMetaData = {
-    id: findUser.id,
+    id: findUser.publicMetadata.metadata.id,
     npm: findUser.publicMetadata.metadata.npm,
-    username: findUser.username,
-    profileImg: findUser.imageUrl,
+    fullName: findUser.publicMetadata.metadata.fullName,
+    profileImg: findUser.publicMetadata.metadata.profileImg,
     universitas: findUser.publicMetadata.metadata.universitas,
     telpon: findUser.publicMetadata.metadata.telpon,
     tanggal_lahir: findUser.publicMetadata.metadata.tanggal_lahir,
@@ -41,6 +42,18 @@ export async function PUT(req, _res) {
   if (!userId) {
     return NextResponse.json({ message: 'No user found' }, { status: 400 })
   }
+
+  const { tanggal_lahir } = userData
+
+  await prisma.user.update({
+    where: {
+      id: userId
+    },
+    data: {
+      ...userData,
+      tanggal_lahir: new Date(tanggal_lahir)
+    }
+  })
 
   await clerk.users.updateUserMetadata(userId, {
     publicMetadata: {

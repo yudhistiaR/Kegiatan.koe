@@ -21,6 +21,12 @@ enum TASK_STATUS {
   DONE
 }
 
+enum RAB_STATUS_VERIFIED {
+  PENDING
+  REJECTED
+  APPROVED
+}
+
 enum TASK_PRIORITY {
   HIGH
   MEDIUM
@@ -35,12 +41,12 @@ enum JENIS_ANGGOTA_DIVISI {
 
 model User {
   id            String    @id @unique
-  clerkId       String    @unique
-  username      String?
+  username      String
   npm           String?
   email         String    @unique
-  firstName     String?
-  lastName      String?
+  firstName     String
+  lastName      String
+  fullName      String?
   universitas   String?
   alamat        String?
   telpon        String?
@@ -52,41 +58,50 @@ model User {
 
   anggotaDivisi     AnggotaDivisi[]
   organisasi_member Organisasi_member[]
+  Proker            Proker[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Divisi    Divisi[]
 }
 
 model Proker {
-  id          String      @id @default(uuid())
-  org_id      String
-  title       String      @map("proker_name")
-  author      String      @map("proker_author")
-  description String      @map("proker_desc") @db.Text
-  divisi      Divisi[]
-  start       DateTime    @map("proker_start")
-  end         DateTime?   @map("proker_end")
-  created_at  DateTime    @default(now()) @map("created_at")
-  tugas       Tugas[]
-  rab         rab[]
-  notulensi   notulensi[]
+  id               String       @id @default(uuid())
+  orgId            String
+  ketuaPelaksanaId String
+  title            String       @map("proker_name")
+  description      String       @map("proker_desc") @db.Text
+  divisi           Divisi[]
+  start            DateTime     @map("proker_start")
+  end              DateTime?    @map("proker_end")
+  created_at       DateTime     @default(now()) @map("created_at")
+  tugas            Tugas[]
+  rab              rab[]
+  notulensi        notulensi[]
+  Pendanaan        SumberDana[]
+  organisasi       Organisasi   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  ketua_pelaksana User @relation(fields: [ketuaPelaksanaId], references: [id], onDelete: Cascade)
 
   @@map("program_kerja")
 }
 
 model Organisasi {
-  id         String @id @unique
-  name       String
-  slug       String
-  created_by String
-  image_url  String @db.Text
-
+  id                String              @id @unique
+  name              String
+  slug              String
+  created_by        String
+  image_url         String              @db.Text
+  notulensi         notulensi[]
+  rab               rab[]
+  Pendanaan         SumberDana[]
+  Proker            Proker[]
+  Divisi            Divisi[]
+  Tugas             Tugas[]
   organisasi_member Organisasi_member[]
 
-  created_at DateTime    @default(now()) @map("created_at")
-  updated_at DateTime?   @updatedAt @map("updated_at")
-  notulensi  notulensi[]
-  rab        rab[]
+  created_at DateTime  @default(now()) @map("created_at")
+  updated_at DateTime? @updatedAt @map("updated_at")
 }
 
 model Organisasi_member {
@@ -104,32 +119,35 @@ model Organisasi_member {
 }
 
 model Divisi {
-  id          String          @id @default(uuid())
-  proker_id   String          @map("proker_id")
-  org_id      String          @map("divisi_org_id")
-  name        String          @map("divisi_name")
-  description String          @map("divisi_desc") @db.Text
-  anggota     AnggotaDivisi[]
-  created_at  DateTime        @default(now()) @map("created_at")
-  updated_at  DateTime?       @updatedAt @map("updated_at")
+  id           String          @id @default(uuid())
+  prokerId     String          @map("proker_id")
+  orgId        String          @map("divisi_org_id")
+  kordinatorId String
+  name         String          @map("divisi_name")
+  description  String          @map("divisi_desc") @db.Text
+  anggota      AnggotaDivisi[]
+  tugasDivisi  Tugas[]
+  rab          rab[]
+  notulensi    notulensi[]
+  created_at   DateTime        @default(now()) @map("created_at")
+  updated_at   DateTime?       @updatedAt @map("updated_at")
 
-  proker      Proker      @relation(fields: [proker_id], references: [id], onDelete: Cascade)
-  tugasDivisi Tugas[]
-  rab         rab[]
-  notulensi   notulensi[]
+  kordinatorDivisi User       @relation(fields: [kordinatorId], references: [id], onDelete: Cascade)
+  proker           Proker     @relation(fields: [prokerId], references: [id], onDelete: Cascade)
+  organisasi       Organisasi @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
   @@map("proker_divisi")
 }
 
 model AnggotaDivisi {
   id            String               @id @unique @default(uuid())
-  divisi_id     String               @map("divisi_id")
-  user_id       String
+  divisiId      String               @map("divisi_id")
+  userId        String
   jenis_jabatan JENIS_ANGGOTA_DIVISI @default(value: STAFF) @map("anggota_jabatan")
   tugasAnggota  Tugas[]
 
-  divisi     Divisi   @relation(fields: [divisi_id], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  divisi     Divisi   @relation(fields: [divisiId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   created_at DateTime @default(now()) @map("created_at")
 
   @@map("anggota_divisi")
@@ -139,6 +157,7 @@ model Tugas {
   id          String          @id @unique @default(uuid())
   divisiId    String?
   prokerId    String?
+  orgId       String?
   name        String          @map("tugas_name")
   priority    TASK_PRIORITY
   description String          @map("tugas_description")
@@ -148,23 +167,50 @@ model Tugas {
   order       Int
   assignedTo  AnggotaDivisi[]
 
-  proker Proker? @relation(fields: [prokerId], references: [id], onDelete: Cascade)
-  divisi Divisi? @relation(fields: [divisiId], references: [id], onDelete: Cascade)
+  proker     Proker?     @relation(fields: [prokerId], references: [id], onDelete: Cascade)
+  divisi     Divisi?     @relation(fields: [divisiId], references: [id], onDelete: Cascade)
+  organisasi Organisasi? @relation(fields: [orgId], references: [id], onDelete: Cascade)
 }
 
 model rab {
-  id       String  @id @unique @default(uuid())
-  orgId    String?
-  divisiId String?
-  prokerId String?
-  nama     String
-  harga    String
-  jumlah   String
-  satuan   String
+  id           String              @id @unique @default(uuid())
+  orgId        String
+  divisiId     String              @unique
+  prokerId     String
+  listRab      ListRab[]
+  note         String?             @db.Text
+  total_revisi Int?                @default(0)
+  status       RAB_STATUS_VERIFIED @default(value: PENDING)
 
-  divisi     Divisi?     @relation(fields: [divisiId], references: [id], onDelete: Cascade)
-  proker     Proker?     @relation(fields: [prokerId], references: [id], onDelete: Cascade)
-  organisasi Organisasi? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  divisi     Divisi     @relation(fields: [divisiId], references: [id], onDelete: Cascade)
+  proker     Proker     @relation(fields: [prokerId], references: [id], onDelete: Cascade)
+  organisasi Organisasi @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
+
+model ListRab {
+  id     String @id @unique @default(uuid())
+  nama   String
+  harga  String
+  jumlah String
+  satuan String
+
+  rab   rab?    @relation(fields: [rabId], references: [id])
+  rabId String?
+}
+
+model SumberDana {
+  id       String              @id @unique @default(uuid())
+  orgId    String
+  prokerId String
+  sumber   String?
+  type     String?
+  jumlah   Decimal
+  kontak   String?
+  catatan  String?             @db.Text
+  status   RAB_STATUS_VERIFIED @default(value: PENDING)
+
+  organisasi Organisasi @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  proker     Proker     @relation(fields: [prokerId], references: [id], onDelete: Cascade)
 }
 
 model notulensi {

@@ -5,22 +5,16 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@clerk/nextjs'
 import { formatDate } from '@/helpers/formatedate'
 
-//componets
-import { CardLoading } from '../CardLoading'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card'
+//components
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
-import { User, Target, PencilLine } from 'lucide-react'
+import { User, Target, Calendar } from 'lucide-react'
+import { LoadingState, NotDataState, ErrorState } from '../LoadState/LoadStatus'
 
 const ProkerList = () => {
   const { userId, orgId, orgSlug, isLoaded } = useAuth()
 
-  const { data, isLoading, isPending } = useQuery({
+  const { data, isLoading, isPending, error } = useQuery({
     queryKey: ['proker-list', userId, orgId],
     queryFn: async () => {
       const res = await fetch('/api/v1/proker', {
@@ -39,61 +33,132 @@ const ProkerList = () => {
     enabled: isLoaded && !!userId && !!orgId
   })
 
-  if (!isLoaded || isLoading || isPending) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {Array.from({ length: 5 }, (_, i) => (
-          <CardLoading key={i} />
-        ))}
-      </div>
-    )
+  if (isLoading || isPending) {
+    return <LoadingState />
+  }
+
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return <NotDataState />
+  }
+
+  if (error) {
+    return <ErrorState error={error} />
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      {data.length > 0 ? (
-        <>
-          {data.map((proker, _) => (
-            <Link href={`/${orgSlug}/proker/${proker.id}`} key={proker.id}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>{proker.title}</CardTitle>
-                  <CardDescription>
-                    <div className="flex items-center gap-2 text-xs mt-2 font-semibold text-white">
-                      <p className="bg-green-500/80 p-[3px] rounded-xs">
-                        LIST ID {proker.id.split('-')[0]}
-                      </p>
-                      <p className="bg-red-500/80 p-[3px] rounded-xs">
-                        Persentase 40%
-                      </p>
-                    </div>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col gap-2">
-                    <p className="text-xs font-semibold flex items-center gap-2">
-                      <User size={20} className="text-accentColor" />
-                      {proker.author}
-                    </p>
-                    <p className="text-xs font-semibold flex items-center gap-2">
-                      <Target size={20} className="text-accentColor" />
-                      Persiapan : {formatDate(proker.end)}
-                    </p>
-                    <p className="text-xs font-semibold flex items-center gap-2">
-                      <PencilLine size={20} className="text-accentColor" />
-                      Pelaksanaan : {formatDate(proker.start)}
-                    </p>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {data.map(proker => {
+        const totalTugas = proker.tugas?.length || 0
+        const completedTasks =
+          proker.tugas?.filter(task => task.status === 'DONE').length || 0
+        const progressPercentage =
+          totalTugas > 0 ? Math.round((completedTasks / totalTugas) * 100) : 0
+
+        const getProgramStatus = () => {
+          if (totalTugas === 0)
+            return {
+              label: 'Belum Ada Tugas',
+              color: 'bg-slate-100 text-slate-700 border-slate-200'
+            }
+          if (progressPercentage === 100)
+            return {
+              label: 'Selesai',
+              color: 'bg-green-100 text-green-700 border-green-200'
+            }
+          if (progressPercentage >= 50)
+            return {
+              label: 'Sedang Berlangsung',
+              color: 'bg-blue-100 text-blue-700 border-blue-200'
+            }
+          if (progressPercentage > 0)
+            return {
+              label: 'Baru Dimulai',
+              color: 'bg-yellow-100 text-yellow-700 border-yellow-200'
+            }
+          return {
+            label: 'Belum Dimulai',
+            color: 'bg-slate-100 text-slate-700 border-slate-200'
+          }
+        }
+
+        const programStatus = getProgramStatus()
+
+        return (
+          <Link href={`/${orgSlug}/proker/${proker.id}`} key={proker.id}>
+            <Card className="h-full transition-all duration-300 hover:shadow-md border-zinc-500">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <CardTitle className="text-lg font-semibold line-clamp-2 flex-1">
+                    {proker.title}
+                  </CardTitle>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ml-2 ${programStatus.color}`}
+                  >
+                    {programStatus.label}
+                  </span>
+                </div>
+
+                {proker.description && (
+                  <p className="text-sm line-clamp-2 mt-2">
+                    {proker.description}
+                  </p>
+                )}
+              </CardHeader>
+
+              <CardContent className="pt-0">
+                <div className="mb-4">
+                  <div className="w-full bg-slate-200 rounded-full h-2.5">
+                    <div
+                      className="h-2.5 rounded-full transition-all duration-500 ease-out"
+                      style={{
+                        width: `${progressPercentage}%`,
+                        backgroundColor: 'oklch(56.95% 0.165 266.79)'
+                      }}
+                    ></div>
                   </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </>
-      ) : (
-        <div className="w-full h-full col-span-4 text-2xl font-bold flex justify-center items-center mt-20">
-          <p>Program Kerja masih kosong</p>
-        </div>
-      )}
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-xs">
+                      {completedTasks} dari {totalTugas} tugas selesai
+                    </span>
+                    <span className="text-xs font-medium">
+                      {progressPercentage}%
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    <User
+                      size={16}
+                      style={{ color: 'oklch(56.95% 0.165 266.79)' }}
+                    />
+                    <span className="font-medium">
+                      {proker.ketua_pelaksana?.fullName ||
+                        'Tidak ada ketua pelaksana'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar
+                      size={16}
+                      style={{ color: 'oklch(56.95% 0.165 266.79)' }}
+                    />
+                    <span>Mulai: {formatDate(proker.start)}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm">
+                    <Target
+                      size={16}
+                      style={{ color: 'oklch(56.95% 0.165 266.79)' }}
+                    />
+                    <span>Selesai: {formatDate(proker.end)}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        )
+      })}
     </div>
   )
 }

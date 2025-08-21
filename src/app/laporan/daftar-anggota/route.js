@@ -72,7 +72,7 @@ const PageFooter = ({ totalMembers, currentPageStart, currentPageEnd }) => (
   </View>
 )
 
-export async function GET(req, res) {
+export async function GET() {
   try {
     const { userId, orgId, redirectToSignIn } = await auth()
 

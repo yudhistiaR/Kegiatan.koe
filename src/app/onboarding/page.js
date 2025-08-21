@@ -28,7 +28,7 @@ const OnBoardingPage = () => {
         'Mari kenal lebih dekat dengan Anda. Isi informasi dasar Anda.',
       percent: 50,
       fields: [
-        'username',
+        'fullName',
         'npm',
         'universitas',
         'telpon',
@@ -47,6 +47,7 @@ const OnBoardingPage = () => {
 
   const updateUserProfile = useMutation({
     mutationFn: async data => {
+      console.log(data)
       const req = await fetch('/api/v1/me', {
         method: 'PUT',
         body: JSON.stringify(data)
@@ -82,7 +83,7 @@ const OnBoardingPage = () => {
     formState: { errors, isSubmitting }
   } = useForm({
     defaultValues: {
-      username: '',
+      fullName: '',
       npm: '',
       universitas: '',
       telpon: '',
@@ -122,7 +123,7 @@ const OnBoardingPage = () => {
       if (res?.message) {
         await user?.reload()
         updateUserProfile.mutate(data)
-        router.push('/dashboard')
+        router.push('/')
       }
     } else {
       nextStep()
@@ -168,12 +169,12 @@ const OnBoardingPage = () => {
               {currentStep === 0 && (
                 <>
                   <div className="grid gap-2">
-                    <Label htmlFor="username">Username</Label>
+                    <Label htmlFor="nama_lengkap">Nama Lengkap</Label>
                     <Input
-                      id="username"
-                      placeholder="Masukkan username Anda"
-                      {...register('username', {
-                        required: 'Username wajib diisi'
+                      id="nama_lengkap"
+                      placeholder="Masukkan Nama Anda"
+                      {...register('fullName', {
+                        required: 'Nama wajib diisi'
                       })}
                     />
                     {errors.username && (
@@ -305,7 +306,7 @@ const OnBoardingPage = () => {
                     <textarea
                       id="bio"
                       maxLength={500}
-                      rows={5} // Menyesuaikan tinggi textarea
+                      rows={3} // Menyesuaikan tinggi textarea
                       placeholder="Ceritakan sedikit tentang diri Anda"
                       {...register('bio')}
                       className="w-full rounded-md border border-input px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"

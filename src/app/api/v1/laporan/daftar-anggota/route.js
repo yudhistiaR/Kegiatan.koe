@@ -8,7 +8,7 @@ import {
   renderToStream
 } from '@react-pdf/renderer'
 
-export async function GET(req, res) {
+export async function GET() {
   const stream = await renderToStream(
     <Document>
       <Page size="A4" style={styles.page}>

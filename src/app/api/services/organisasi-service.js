@@ -15,8 +15,7 @@ export class OrganisasiService {
         user: {
           select: {
             id: true,
-            clerkId: true,
-            username: true,
+            fullName: true,
             npm: true,
             email: true,
             universitas: true,

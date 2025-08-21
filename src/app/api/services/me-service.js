@@ -16,8 +16,7 @@ export class MeService {
 
     return await this.prisma.user.update({
       where: {
-        id: user_id,
-        clerkId: user_id
+        id: user_id
       },
       data: {
         ...data,

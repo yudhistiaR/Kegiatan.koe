@@ -91,7 +91,7 @@ const PageFooter = ({ totalProker, currentPageStart, currentPageEnd }) => (
   </View>
 )
 
-export async function GET(req, res) {
+export async function GET(_req, _res) {
   try {
     const { userId, orgId, redirectToSignIn } = await auth()
 

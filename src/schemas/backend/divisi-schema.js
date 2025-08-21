@@ -13,9 +13,9 @@ export class DivisiSchema {
   })
 
   static CREATE = z.object({
-    org_id: z.string().min(1),
-    user_id: z.string().min(1),
-    proker_id: z.string().min(1).uuid(),
+    orgId: z.string().min(1),
+    kordinatorId: z.string().min(1),
+    prokerId: z.string().min(1).uuid(),
     name: z.string().min(1).max(255),
     description: z.string().min(1).max(500)
   })

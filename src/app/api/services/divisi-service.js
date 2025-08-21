@@ -13,6 +13,8 @@ export class DivisiService {
       },
       select: {
         id: true,
+        orgId: true,
+        prokerId: true,
         name: true,
         description: true,
         created_at: true,
@@ -28,6 +30,7 @@ export class DivisiService {
                 email: true,
                 telpon: true,
                 username: true,
+                fullName: true,
                 profileImg: true,
                 universitas: true,
                 jenis_kelamin: true
@@ -48,8 +51,8 @@ export class DivisiService {
         name: 'asc'
       },
       where: {
-        org_id: org_id ?? this.prisma.skip,
-        proker_id: proker_id ?? this.prisma.skip
+        orgId: org_id ?? this.prisma.skip,
+        prokerId: proker_id ?? this.prisma.skip
       },
       select: {
         id: true,
@@ -67,6 +70,7 @@ export class DivisiService {
                 npm: true,
                 email: true,
                 username: true,
+                fullName: true,
                 profileImg: true
               }
             }
@@ -79,7 +83,7 @@ export class DivisiService {
   async GET_DIVISIONS_WITH_MEMBERS_BY_ORG(orgId) {
     return this.prisma.divisi.findMany({
       where: {
-        org_id: orgId
+        orgId: orgId
       },
       select: {
         id: true,
@@ -102,26 +106,19 @@ export class DivisiService {
   async CREATE(data) {
     return this.prisma.divisi.create({
       data: {
-        org_id: data.org_id,
-        name: data.name,
-        description: data.description,
-        proker: {
-          connect: {
-            id: data.proker_id
-          }
-        },
+        ...data,
         anggota: {
           connectOrCreate: {
             create: {
               jenis_jabatan: 'KORDINATOR',
               user: {
                 connect: {
-                  id: data.user_id
+                  id: data.kordinatorId
                 }
               }
             },
             where: {
-              id: data.user_id
+              id: data.kordinatorId
             }
           }
         }
@@ -130,7 +127,7 @@ export class DivisiService {
   }
 
   async addDivisiMember(data) {
-    const { divisi_id, members } = data
+    const { divisiId, members } = data
 
     const findNotDuplicated = (arr1, arr2) => {
       const combinedArray = [...arr1, ...arr2]
@@ -143,8 +140,8 @@ export class DivisiService {
 
     const isExitingMember = await this.prisma.anggotaDivisi.findMany({
       where: {
-        divisi_id: divisi_id,
-        user_id: {
+        divisiId: divisiId,
+        userId: {
           in: members
         }
       }
@@ -152,15 +149,15 @@ export class DivisiService {
 
     const isNotDuplicated = findNotDuplicated(
       members,
-      isExitingMember.map(item => item.user_id)
+      isExitingMember.map(item => item.userId)
     )
 
     if (isNotDuplicated.length <= 0) return
 
     await this.prisma.anggotaDivisi.createMany({
       data: isNotDuplicated.map(item => ({
-        divisi_id: divisi_id,
-        user_id: item
+        divisiId: divisiId,
+        userId: item
       })),
       skipDuplicates: true
     })
@@ -172,8 +169,8 @@ export class DivisiService {
     return this.prisma.divisi.delete({
       where: {
         id: divisi_id ?? this.prisma.skip,
-        proker_id: proker_id ?? this.prisma.skip,
-        org_id: org_id ?? this.prisma.skip
+        prokerId: proker_id ?? this.prisma.skip,
+        orgId: org_id ?? this.prisma.skip
       }
     })
   }

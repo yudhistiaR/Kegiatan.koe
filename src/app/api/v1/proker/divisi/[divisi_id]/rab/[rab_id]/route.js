@@ -12,3 +12,7 @@ export async function DELETE(_, segmenData) {
 
   return rabController.DELETE(rab_id)
 }
+
+export async function PATCH(data) {
+  return rabController.UPDATERABSTATUS(data)
+}

@@ -18,6 +18,30 @@ export class RabService {
     })
   }
 
+  async updateRevisiStatus(data) {
+    return await this.prisma.rab.update({
+      where: {
+        id: data.id
+      },
+      data: {
+        total_revisi: data.total_revisi + 1,
+        status: 'PENDING'
+      }
+    })
+  }
+
+  async updateRabStatus(data) {
+    return await this.prisma.rab.update({
+      where: {
+        id: data.rabId
+      },
+      data: {
+        status: data.status,
+        note: data.notes
+      }
+    })
+  }
+
   async GET_TOTAL_RAB_BY_DIVISI(orgId) {
     const rabItems = await this.prisma.rab.findMany({
       where: {
@@ -43,16 +67,28 @@ export class RabService {
     return totals
   }
 
-  async GETALL() {
+  async GETALL(orgId) {
     return await this.prisma.rab.findMany({
+      where: {
+        orgId: orgId
+      },
       select: {
         id: true,
+        orgId: true,
         prokerId: true,
         divisiId: true,
-        nama: true,
-        harga: true,
-        jumlah: true,
-        satuan: true,
+        status: true,
+        note: true,
+        total_revisi: true,
+        listRab: {
+          select: {
+            id: true,
+            nama: true,
+            harga: true,
+            jumlah: true,
+            satuan: true
+          }
+        },
         organisasi: {
           select: {
             id: true,
@@ -64,7 +100,7 @@ export class RabService {
           select: {
             id: true,
             title: true,
-            author: true,
+            ketua_pelaksana: true,
             description: true
           }
         },
@@ -93,12 +129,21 @@ export class RabService {
       },
       select: {
         id: true,
+        orgId: true,
         prokerId: true,
         divisiId: true,
-        nama: true,
-        harga: true,
-        jumlah: true,
-        satuan: true,
+        status: true,
+        note: true,
+        total_revisi: true,
+        listRab: {
+          select: {
+            id: true,
+            nama: true,
+            harga: true,
+            jumlah: true,
+            satuan: true
+          }
+        },
         organisasi: {
           select: {
             id: true,
@@ -110,7 +155,7 @@ export class RabService {
           select: {
             id: true,
             title: true,
-            author: true,
+            ketua_pelaksana: true,
             description: true
           }
         },
@@ -126,13 +171,47 @@ export class RabService {
   }
 
   async CREATE(data) {
-    return await this.prisma.rab.create({
-      data: data
+    const findRab = await this.prisma.rab.upsert({
+      where: {
+        divisiId: data.divisiId
+      },
+      create: {
+        orgId: data.orgId,
+        divisiId: data.divisiId,
+        prokerId: data.prokerId,
+        listRab: {
+          create: [
+            {
+              nama: data.nama,
+              harga: data.harga,
+              jumlah: data.jumlah,
+              satuan: data.satuan
+            }
+          ]
+        }
+      },
+      update: {
+        listRab: {
+          create: [
+            {
+              nama: data.nama,
+              harga: data.harga,
+              jumlah: data.jumlah,
+              satuan: data.satuan
+            }
+          ]
+        }
+      },
+      include: {
+        listRab: true
+      }
     })
+
+    return findRab
   }
 
   async DELETE(id) {
-    return await this.prisma.rab.delete({
+    return await this.prisma.listRab.delete({
       where: { id }
     })
   }

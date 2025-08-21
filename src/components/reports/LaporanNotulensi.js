@@ -177,8 +177,8 @@ const LaporanNotulensi = () => {
             ) : (
               <View style={styles.emptyState}>
                 <Text style={styles.emptyText}>
-                  Tidak ada data notulensi untuk program kerja "
-                  {selectedProkerTitle}".
+                  {`Tidak ada data notulensi untuk program kerja "
+                  ${selectedProkerTitle}".`}
                 </Text>
               </View>
             )}
