@@ -2,8 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { ReponseError } from '../errors/ResponseError'
 import { verifyWebhook } from '@clerk/nextjs/webhooks'
-import { auth, createClerkClient } from '@clerk/nextjs/server'
-import { metadata } from '@/app/layout'
+import { createClerkClient } from '@clerk/nextjs/server'
 
 const clerk = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY

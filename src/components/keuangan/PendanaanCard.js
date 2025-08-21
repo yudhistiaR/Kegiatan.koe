@@ -18,7 +18,7 @@ import { formatCurrency } from '@/lib/utils'
 import { formatDate } from '@/helpers/formatedate'
 
 export function FundingCard({ data, onEdit }) {
-  const { orgSlug, orgId } = useAuth()
+  const { orgSlug } = useAuth()
 
   const getStatusFromRAB = rabList => {
     if (!rabList || rabList.length === 0) return 'draft'
