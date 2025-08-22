@@ -106,6 +106,16 @@ const DetailProker = ({ orgId, prokerId }) => {
     getCoreRowModel: getCoreRowModel()
   })
 
+  const totalRAB = useMemo(
+    () =>
+      allRabItems.reduce((sum, item) => {
+        const harga = parseFloat(item.harga) || 0
+        const jumlah = parseFloat(item.jumlah) || 1
+        return sum + harga * jumlah
+      }, 0),
+    [allRabItems]
+  )
+
   if (isLoading || isPending) {
     return <LoadingState />
   }
@@ -121,16 +131,6 @@ const DetailProker = ({ orgId, prokerId }) => {
   const totalDivisi = data.divisi?.length || 0
   const totalTugas = data.tugas?.length || 0
   const totalNotulensi = data.notulensi?.length || 0
-
-  const totalRAB = useMemo(
-    () =>
-      allRabItems.reduce((sum, item) => {
-        const harga = parseFloat(item.harga) || 0
-        const jumlah = parseFloat(item.jumlah) || 1
-        return sum + harga * jumlah
-      }, 0),
-    [allRabItems]
-  )
 
   const completedTasks =
     data.tugas?.filter(task => task.status === 'DONE').length || 0
