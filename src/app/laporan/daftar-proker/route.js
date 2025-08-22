@@ -108,14 +108,12 @@ export async function GET(_req, _res) {
     // Fetch all program kerja from database
     const listProgramKerja = await prisma.proker.findMany({
       where: {
-        org_id: orgId
+        orgId: orgId
       },
       orderBy: {
         start: 'asc'
       }
     })
-
-    console.log(listProgramKerja)
 
     // Transform Prisma data to PDF format
     const prokerData = listProgramKerja.map((proker, index) => ({

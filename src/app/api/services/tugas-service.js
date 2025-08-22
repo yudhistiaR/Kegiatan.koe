@@ -502,7 +502,7 @@ export class TugasService {
       by: ['divisiId', 'status'],
       where: {
         divisi: {
-          org_id: org_id
+          orgId: org_id
         }
       },
       _count: {
@@ -560,7 +560,7 @@ export class TugasService {
     return await this.prisma.tugas.findMany({
       where: {
         proker: {
-          org_id: org_id
+          orgId: org_id
         }
       },
       include: {
@@ -588,7 +588,7 @@ export class TugasService {
     return await this.prisma.tugas.findMany({
       where: {
         proker: {
-          org_id: org_id
+          orgId: org_id
         }
       },
       orderBy: [{ status: 'asc' }, { order: 'asc' }, { name: 'asc' }],
@@ -613,7 +613,7 @@ export class TugasService {
           select: {
             id: true,
             title: true,
-            org_id: true
+            orgId: true
           }
         },
         assignedTo: {

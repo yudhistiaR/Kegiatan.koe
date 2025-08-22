@@ -24,57 +24,57 @@ const formatDate = dateString => {
   })
 }
 
-// Function to format currency
 const formatCurrency = amount => {
+  const parsedAmount = parseFloat(amount) || 0
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0
-  }).format(amount)
+  }).format(parsedAmount)
 }
 
-// Function to group RAB items by division with proker details and filter
-const groupRabByDivision = (rabItems, selectedProker = 'all') => {
+const groupRabByDivision = (prokerData, selectedProker = 'all') => {
   const grouped = {}
 
-  rabItems.forEach(proker => {
-    // Skip proker if filter is applied and doesn't match
+  prokerData.forEach(proker => {
     if (selectedProker !== 'all' && proker.title !== selectedProker) {
       return
     }
 
-    proker.rab.forEach(rabItem => {
-      const divisionName = rabItem.divisi?.name || 'Tidak Ada Divisi'
+    const divisionName = proker.divisi[0]?.name || 'Tidak Ada Divisi'
 
-      if (!grouped[divisionName]) {
-        grouped[divisionName] = {
-          items: [],
-          prokers: new Map()
-        }
+    if (!grouped[divisionName]) {
+      grouped[divisionName] = {
+        items: [],
+        prokers: new Map()
       }
+    }
 
-      // Store unique prokers for this division
-      if (!grouped[divisionName].prokers.has(proker.id)) {
-        grouped[divisionName].prokers.set(proker.id, {
-          id: proker.id,
-          title: proker.title,
-          author: proker.author,
-          description: proker.description,
-          start: proker.start,
-          end: proker.end
-        })
-      }
-
-      grouped[divisionName].items.push({
-        ...rabItem,
-        prokerTitle: proker.title,
-        prokerAuthor: proker.author,
-        prokerId: proker.id
+    // Simpan proker unik untuk divisi ini
+    if (!grouped[divisionName].prokers.has(proker.id)) {
+      grouped[divisionName].prokers.set(proker.id, {
+        id: proker.id,
+        title: proker.title,
+        author: proker.ketua_pelaksana?.fullName,
+        description: proker.description,
+        start: proker.start,
+        end: proker.end
       })
+    }
+
+    const allRabItems = (proker.rab || []).flatMap(rabGroup => {
+      return (rabGroup.listRab || []).map(item => ({
+        ...item,
+        prokerTitle: proker.title,
+        prokerAuthor: proker.ketua_pelaksana?.fullName,
+        prokerId: proker.id,
+        divisi: { name: divisionName }
+      }))
     })
+
+    grouped[divisionName].items.push(...allRabItems)
   })
 
-  // Convert prokers Map to Array for easier handling
   Object.keys(grouped).forEach(division => {
     grouped[division].prokers = Array.from(grouped[division].prokers.values())
   })
@@ -82,10 +82,11 @@ const groupRabByDivision = (rabItems, selectedProker = 'all') => {
   return grouped
 }
 
-// Function to calculate total per division
 const calculateDivisionTotal = divisionData => {
   return divisionData.items.reduce((total, item) => {
-    return total + item.harga * item.jumlah
+    const harga = parseFloat(item.harga) || 0
+    const jumlah = parseFloat(item.jumlah) || 0
+    return total + harga * jumlah
   }, 0)
 }
 
@@ -106,8 +107,11 @@ const PageHeader = ({ orgName, pageNumber, totalPages }) => (
 )
 
 // Component for division header with proker details
-const DivisionHeader = ({ prokers }) => (
+const DivisionHeader = ({ prokers, divisionName }) => (
   <>
+    <View style={styles.divisionSection}>
+      <Text style={styles.divisionName}>{divisionName.toUpperCase()}</Text>
+    </View>
     {/* Program Kerja Details */}
     <View style={styles.prokerSection}>
       <Text style={styles.prokerSectionTitle}>Program Kerja:</Text>
@@ -191,33 +195,25 @@ export async function GET(req) {
       organizationId: orgId
     })
 
-    // Fixed Prisma query with conditional filtering
-    let whereClause = { org_id: orgId }
-
-    // Add proker filter if specified
-    if (selectedProker !== 'all') {
-      whereClause.title = selectedProker
-    }
-
-    const rabItems = await prisma.proker.findMany({
-      where: whereClause,
+    // Perbaikan: Ambil data proker dengan relasi yang benar
+    const prokerData = await prisma.proker.findMany({
+      where: { orgId: orgId },
       include: {
+        divisi: true, // Pastikan relasi divisi di-include
+        ketua_pelaksana: true,
         rab: {
           include: {
-            divisi: {
-              select: {
-                name: true
-              }
-            }
+            listRab: true, // Pastikan listRab di-include
+            divisi: true // Pastikan relasi divisi di-include
           }
-        }
+        },
+        tugas: true,
+        notulensi: true
       }
     })
 
-    console.dir(rabItems, { depth: Infinity })
-
     // Group RAB by division with filter
-    const groupedRab = groupRabByDivision(rabItems, selectedProker)
+    const groupedRab = groupRabByDivision(prokerData, selectedProker)
 
     // Check if no data after filtering
     if (Object.keys(groupedRab).length === 0) {
@@ -281,8 +277,6 @@ export async function GET(req) {
               orgName={organization.name}
               pageNumber={pageData.pageNumber}
               totalPages={totalPages}
-              divisionName={pageData.divisionName}
-              filterInfo={selectedProker}
             />
 
             {/* Division Header with Proker Details - only on first page of each division */}
@@ -447,7 +441,7 @@ export async function GET(req) {
                 </View>
               )}
             </View>
-
+            <View style={{ flex: 1 }} />
             {/* Page Footer */}
             <PageFooter grandTotal={grandTotal} filterInfo={selectedProker} />
           </Page>

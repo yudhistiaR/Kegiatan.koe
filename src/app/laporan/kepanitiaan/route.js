@@ -100,7 +100,7 @@ export async function GET(req) {
     // Menggunakan logika Prisma yang Anda berikan
     const prokerData = await prisma.proker.findMany({
       where: {
-        org_id: orgId,
+        orgId: orgId,
         ...(prokerId !== 'all' && { id: prokerId })
       },
       select: {

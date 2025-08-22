@@ -12,33 +12,23 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
+import { Card, CardContent } from '@/components/ui/card'
+import { Loader2 } from 'lucide-react'
 
 const LaporanRab = ({ onFilterChange }) => {
   const { orgId } = useAuth()
   const [selectedProkerFilter, setSelectedProkerFilter] = useState('all')
 
   const {
-    data: rabData,
-    isLoading: isLoadingRab,
-    error: errorRab
+    data: prokerData,
+    isLoading: isLoadingProker,
+    error: errorProker
   } = useQuery({
-    queryKey: ['laporan-rab', orgId],
-    queryFn: async () => {
-      const response = await fetch(`/api/v1/laporan/rab/${orgId}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch RAB data')
-      }
-      return response.json()
-    },
-    enabled: !!orgId
-  })
-
-  const { data: prokerList, isLoading: isLoadingProker } = useQuery({
-    queryKey: ['proker-list-for-rab-filter', orgId],
+    queryKey: ['proker-rab-data', orgId],
     queryFn: async () => {
       const response = await fetch(`/api/v1/laporan/proker/${orgId}`)
       if (!response.ok) {
-        throw new Error('Failed to fetch proker list')
+        throw new Error('Gagal mengambil data program kerja')
       }
       return response.json()
     },
@@ -46,23 +36,29 @@ const LaporanRab = ({ onFilterChange }) => {
   })
 
   const groupedData = useMemo(() => {
-    if (!rabData) return {}
+    if (!prokerData) return {}
 
-    const grouped = rabData.reduce((acc, item) => {
-      const prokerTitle = item.proker.title
-      if (!acc[prokerTitle]) {
-        acc[prokerTitle] = []
-      }
-      acc[prokerTitle].push(item)
-      return acc
-    }, {})
+    const result = {}
 
-    if (selectedProkerFilter === 'all') {
-      return grouped
-    } else {
-      return { [selectedProkerFilter]: grouped[selectedProkerFilter] || [] }
-    }
-  }, [rabData, selectedProkerFilter])
+    const filteredProkerData =
+      selectedProkerFilter === 'all'
+        ? prokerData
+        : prokerData.filter(proker => proker.title === selectedProkerFilter)
+
+    filteredProkerData.forEach(proker => {
+      const allRabItems = (proker.rab || []).flatMap(
+        rabGroup => rabGroup.listRab || []
+      )
+      result[proker.title] = allRabItems
+    })
+
+    return result
+  }, [prokerData, selectedProkerFilter])
+
+  const allProkerTitles = useMemo(() => {
+    const titles = prokerData?.map(p => p.title) || []
+    return ['all', ...new Set(titles)]
+  }, [prokerData])
 
   const columns = useMemo(
     () => [
@@ -92,7 +88,9 @@ const LaporanRab = ({ onFilterChange }) => {
         id: 'totalHarga',
         header: 'Total Harga',
         cell: ({ row }) =>
-          formatCurrency(row.original.harga * row.original.jumlah)
+          formatCurrency(
+            parseFloat(row.original.harga) * parseFloat(row.original.jumlah)
+          )
       }
     ],
     []
@@ -100,30 +98,40 @@ const LaporanRab = ({ onFilterChange }) => {
 
   const handleProkerFilterChange = value => {
     setSelectedProkerFilter(value)
-    // Notify parent component about filter change
     if (onFilterChange) {
       onFilterChange(value)
     }
   }
 
-  const allProkerTitles = useMemo(() => {
-    const titles = prokerList?.map(p => p.title) || []
-    return ['all', ...new Set(titles)]
-  }, [prokerList])
-
-  // Notify parent about initial filter value
   useEffect(() => {
     if (onFilterChange) {
       onFilterChange(selectedProkerFilter)
     }
   }, [selectedProkerFilter, onFilterChange])
 
-  if (errorRab) return <p>Error: {errorRab.message}</p>
+  if (isLoadingProker) {
+    return (
+      <Card className="w-full">
+        <CardContent className="flex flex-col items-center justify-center py-8">
+          <div className="flex items-center justify-center text-center">
+            <Loader2 className="h-6 w-6 animate-spin mr-2" />
+            Memuat data...
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (errorProker) {
+    return (
+      <p className="text-red-500 text-center">Error: {errorProker.message}</p>
+    )
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <span className="text-white">Filter berdasarkan Program Kerja:</span>
+        <span>Filter berdasarkan Program Kerja:</span>
         <Select
           onValueChange={handleProkerFilterChange}
           defaultValue={selectedProkerFilter}
@@ -146,27 +154,33 @@ const LaporanRab = ({ onFilterChange }) => {
 
       {Object.entries(groupedData).length > 0 ? (
         Object.entries(groupedData).map(([prokerTitle, items]) => {
+          // Hanya render tabel jika ada item RAB untuk program kerja ini
+          if (items.length === 0) {
+            return null
+          }
+
           const prokerTotal = items.reduce(
-            (sum, item) => sum + item.harga * item.jumlah,
+            (sum, item) =>
+              sum + parseFloat(item.harga) * parseFloat(item.jumlah),
             0
           )
           return (
             <div
               key={prokerTitle}
-              className="rounded-lg overflow-hidden border border-border"
+              className="rounded-lg overflow-hidden border border-gray-200 shadow-md"
             >
-              <h3 className="text-lg font-semibold p-4 border-b border-border">
+              <h3 className="text-xl font-bold p-4 border-b border-gray-200">
                 {prokerTitle}
               </h3>
               <DataTable
                 data={items}
                 columns={columns}
-                isLoading={isLoadingRab && isLoadingProker}
-                enableGlobalFilter={false} // Disable global filter for sub-tables
+                isLoading={isLoadingProker}
+                enableGlobalFilter={false}
               />
-              <div className="p-4 border-t border-border flex justify-between items-center">
+              <div className="p-4 border-t border-gray-200 flex justify-between items-center">
                 <span className="font-bold">Total Anggaran Proker:</span>
-                <span className="font-bold text-accentColor">
+                <span className="font-bold text-green-600">
                   {formatCurrency(prokerTotal)}
                 </span>
               </div>
@@ -174,7 +188,7 @@ const LaporanRab = ({ onFilterChange }) => {
           )
         })
       ) : (
-        <p className="text-center text-muted-foreground">
+        <p className="text-center text-gray-500">
           Tidak ada data RAB untuk program kerja yang dipilih.
         </p>
       )}

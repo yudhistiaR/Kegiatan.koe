@@ -55,7 +55,7 @@ export class LaporanController {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
       }
 
-      const data = await this.rabService.GET_BY_ORG(org_id)
+      const data = await this.rabService.GETALL(org_id)
       return NextResponse.json(data, { status: 200 })
     } catch (error) {
       return ReponseError(error)

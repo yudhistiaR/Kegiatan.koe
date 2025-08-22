@@ -50,9 +50,44 @@ export class RabService {
         }
       },
       select: {
+        id: true,
+        orgId: true,
+        prokerId: true,
         divisiId: true,
-        harga: true,
-        jumlah: true
+        status: true,
+        note: true,
+        total_revisi: true,
+        listRab: {
+          select: {
+            id: true,
+            nama: true,
+            harga: true,
+            jumlah: true,
+            satuan: true
+          }
+        },
+        organisasi: {
+          select: {
+            id: true,
+            name: true,
+            slug: true
+          }
+        },
+        proker: {
+          select: {
+            id: true,
+            title: true,
+            ketua_pelaksana: true,
+            description: true
+          }
+        },
+        divisi: {
+          select: {
+            id: true,
+            name: true,
+            description: true
+          }
+        }
       }
     })
 

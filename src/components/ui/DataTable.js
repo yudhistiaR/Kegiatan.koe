@@ -53,8 +53,9 @@ const DataTable = ({
     pageSize: pageSize
   })
 
+  // Data yang digunakan oleh tabel adalah data yang diterima langsung dari props.
   const table = useReactTable({
-    data: data || [],
+    data: data,
     columns: columns || [],
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),

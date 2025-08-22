@@ -155,7 +155,7 @@ export async function GET(req) {
     })
 
     const proker = await prisma.proker.findUnique({
-      where: { id: prokerId, org_id: orgId }
+      where: { id: prokerId, orgId: orgId }
     })
 
     if (!proker) {
