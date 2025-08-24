@@ -1,15 +1,16 @@
 import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
 import { Toaster } from 'sonner'
 
 export default async function RootLayout({ children }) {
-  if ((await auth()).sessionClaims?.metadata.onboardingComplete === true) {
+  const { sessionClaims, redirect } = await auth()
+
+  if (sessionClaims.metadata?.onboardingComplete === true) {
     redirect('/dashboard')
   }
 
   return (
     <>
-      {children}
+      <main>{children}</main>
       <Toaster
         richColors
         closeButton

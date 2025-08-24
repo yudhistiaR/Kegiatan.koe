@@ -115,8 +115,6 @@ export async function GET(_req, _res) {
       }
     })
 
-    console.log(listProgramKerja)
-
     // Transform Prisma data to PDF format
     const prokerData = listProgramKerja.map((proker, index) => ({
       no: index + 1,

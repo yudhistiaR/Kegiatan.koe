@@ -27,14 +27,11 @@ export class MeController {
   async UPDATEME(data) {
     try {
       const newData = await data.json()
-
       const { userId } = await this.clerk()
 
-      if (newData.id !== userId)
-        NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
-
-      if (!userId)
-        NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+      if (!userId) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+      }
 
       const res = await this.service.UPDATEME(userId, newData)
 

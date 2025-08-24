@@ -12,6 +12,5 @@ export async function GET() {
     organizationId: orgId
   })
 
-  console.log(data)
   return NextResponse.json(data, { status: 200 })
 }
