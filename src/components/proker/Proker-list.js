@@ -10,6 +10,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { User, Target, Calendar } from 'lucide-react'
 import { LoadingState, NotDataState, ErrorState } from '../LoadState/LoadStatus'
+import { buttonVariants } from '../ui/button'
+import { Eye } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
+import DeleteProker from './DeleteProker'
+import EditProker from './EditProker'
 
 const ProkerList = () => {
   const { userId, orgId, orgSlug, isLoaded } = useAuth()
@@ -54,109 +63,100 @@ const ProkerList = () => {
         const progressPercentage =
           totalTugas > 0 ? Math.round((completedTasks / totalTugas) * 100) : 0
 
-        const getProgramStatus = () => {
-          if (totalTugas === 0)
-            return {
-              label: 'Belum Ada Tugas',
-              color: 'bg-slate-100 text-slate-700 border-slate-200'
-            }
-          if (progressPercentage === 100)
-            return {
-              label: 'Selesai',
-              color: 'bg-green-100 text-green-700 border-green-200'
-            }
-          if (progressPercentage >= 50)
-            return {
-              label: 'Sedang Berlangsung',
-              color: 'bg-blue-100 text-blue-700 border-blue-200'
-            }
-          if (progressPercentage > 0)
-            return {
-              label: 'Baru Dimulai',
-              color: 'bg-yellow-100 text-yellow-700 border-yellow-200'
-            }
-          return {
-            label: 'Belum Dimulai',
-            color: 'bg-slate-100 text-slate-700 border-slate-200'
-          }
-        }
-
-        const programStatus = getProgramStatus()
-
         return (
-          <Link href={`/${orgSlug}/proker/${proker.id}`} key={proker.id}>
-            <Card className="h-full transition-all duration-300 hover:shadow-md border-zinc-500">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg font-semibold line-clamp-2 flex-1">
-                    {proker.title}
-                  </CardTitle>
-                  <span
-                    className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ml-2 ${programStatus.color}`}
-                  >
-                    {programStatus.label}
+          <Card
+            key={proker.id}
+            className="h-full transition-all duration-300 hover:shadow-md border-zinc-500"
+          >
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-lg font-semibold line-clamp-2 flex-1">
+                  {proker.title}
+                </CardTitle>
+                <span>
+                  {/* Detail */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Link
+                        className={`${buttonVariants({ size: 'sm', variant: 'ghost' })}  'text-gray-400 hover:text-white hover:ring ring-accentColor hover:bg-accentColor/20 block'`}
+                        href={`/${orgSlug}/proker/${proker.id}`}
+                      >
+                        <Eye />
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Detail</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  {/* Hapus */}
+                  <DeleteProker orgId={proker.orgId} prokerId={proker.id} />
+                  {/* Edit */}
+                  <EditProker
+                    orgId={proker.orgId}
+                    prokerId={proker.id}
+                    datas={proker}
+                  />
+                </span>
+              </div>
+
+              {proker.description && (
+                <p className="text-sm line-clamp-2 mt-2">
+                  {proker.description}
+                </p>
+              )}
+            </CardHeader>
+
+            <CardContent className="pt-0">
+              <div className="mb-4">
+                <div className="w-full bg-slate-200 rounded-full h-2.5">
+                  <div
+                    className="h-2.5 rounded-full transition-all duration-500 ease-out"
+                    style={{
+                      width: `${progressPercentage}%`,
+                      backgroundColor: 'oklch(56.95% 0.165 266.79)'
+                    }}
+                  ></div>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-xs">
+                    {completedTasks} dari {totalTugas} tugas selesai
+                  </span>
+                  <span className="text-xs font-medium">
+                    {progressPercentage}%
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <User
+                    size={16}
+                    style={{ color: 'oklch(56.95% 0.165 266.79)' }}
+                  />
+                  <span className="font-medium">
+                    {proker.ketua_pelaksana?.fullName ||
+                      'Tidak ada ketua pelaksana'}
                   </span>
                 </div>
 
-                {proker.description && (
-                  <p className="text-sm line-clamp-2 mt-2">
-                    {proker.description}
-                  </p>
-                )}
-              </CardHeader>
-
-              <CardContent className="pt-0">
-                <div className="mb-4">
-                  <div className="w-full bg-slate-200 rounded-full h-2.5">
-                    <div
-                      className="h-2.5 rounded-full transition-all duration-500 ease-out"
-                      style={{
-                        width: `${progressPercentage}%`,
-                        backgroundColor: 'oklch(56.95% 0.165 266.79)'
-                      }}
-                    ></div>
-                  </div>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-xs">
-                      {completedTasks} dari {totalTugas} tugas selesai
-                    </span>
-                    <span className="text-xs font-medium">
-                      {progressPercentage}%
-                    </span>
-                  </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Calendar
+                    size={16}
+                    style={{ color: 'oklch(56.95% 0.165 266.79)' }}
+                  />
+                  <span>Mulai: {formatDate(proker.start)}</span>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <User
-                      size={16}
-                      style={{ color: 'oklch(56.95% 0.165 266.79)' }}
-                    />
-                    <span className="font-medium">
-                      {proker.ketua_pelaksana?.fullName ||
-                        'Tidak ada ketua pelaksana'}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm">
-                    <Calendar
-                      size={16}
-                      style={{ color: 'oklch(56.95% 0.165 266.79)' }}
-                    />
-                    <span>Mulai: {formatDate(proker.start)}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm">
-                    <Target
-                      size={16}
-                      style={{ color: 'oklch(56.95% 0.165 266.79)' }}
-                    />
-                    <span>Selesai: {formatDate(proker.end)}</span>
-                  </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Target
+                    size={16}
+                    style={{ color: 'oklch(56.95% 0.165 266.79)' }}
+                  />
+                  <span>Selesai: {formatDate(proker.end)}</span>
                 </div>
-              </CardContent>
-            </Card>
-          </Link>
+              </div>
+            </CardContent>
+          </Card>
         )
       })}
     </div>

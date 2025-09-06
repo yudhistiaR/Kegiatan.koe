@@ -1,4 +1,9 @@
+'use client'
+
 import { Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Button } from '../ui/button'
+import { RefreshCcw } from 'lucide-react'
 
 export const LoadingState = () => {
   return (
@@ -25,13 +30,19 @@ export const NotDataState = () => {
 }
 
 export const ErrorState = ({ error }) => {
+  const router = useRouter()
+
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <div className="text-red-500 text-lg font-medium mb-2">
-          Error loading data
+          Error Load data
         </div>
-        <div>{error.message}</div>
+        <Button onClick={() => router.refresh()}>
+          <RefreshCcw />
+          Reload
+        </Button>
+        <div className="mt-4">{error.message}</div>
       </div>
     </div>
   )

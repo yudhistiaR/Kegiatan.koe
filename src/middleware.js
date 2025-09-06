@@ -10,7 +10,8 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/api/webhooks(.*)',
   '/api/v1/me(.*)',
-  '/api/v1/(.*)'
+  '/api/v1/(.*)',
+  '/api/v2/(.*)'
 ])
 const isProtectedRoute = createRouteMatcher(['/(.*)/laporan'])
 
