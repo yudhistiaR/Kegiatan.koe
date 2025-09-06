@@ -14,10 +14,10 @@ export const completeOnboarding = async formData => {
   try {
     const res = await client.users.updateUser(userId, {
       publicMetadata: {
-        onboardingComplete: true,
         metadata: {
           ...formData
-        }
+        },
+        onboardingComplete: true
       }
     })
     return { message: res.publicMetadata }

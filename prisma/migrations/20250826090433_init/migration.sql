@@ -61,8 +61,6 @@ CREATE TABLE `Organisasi_member` (
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NULL,
 
-    UNIQUE INDEX `Organisasi_member_clerkMemId_key`(`clerkMemId`),
-    UNIQUE INDEX `Organisasi_member_memberId_key`(`memberId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -117,7 +115,7 @@ CREATE TABLE `rab` (
     `divisiId` VARCHAR(191) NOT NULL,
     `prokerId` VARCHAR(191) NOT NULL,
     `note` TEXT NULL,
-    `total_revisi` INTEGER NULL,
+    `total_revisi` INTEGER NULL DEFAULT 0,
     `status` ENUM('PENDING', 'REJECTED', 'APPROVED') NOT NULL DEFAULT 'PENDING',
 
     UNIQUE INDEX `rab_id_key`(`id`),
@@ -139,15 +137,18 @@ CREATE TABLE `ListRab` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Keuangan` (
+CREATE TABLE `SumberDana` (
     `id` VARCHAR(191) NOT NULL,
     `orgId` VARCHAR(191) NOT NULL,
-    `userId` VARCHAR(191) NOT NULL,
-    `jumlah` VARCHAR(191) NULL,
-    `created_at` DATETIME(3) NULL,
-    `updated_at` DATETIME(3) NULL,
+    `prokerId` VARCHAR(191) NOT NULL,
+    `sumber` VARCHAR(191) NULL,
+    `type` VARCHAR(191) NULL,
+    `jumlah` DECIMAL(65, 30) NOT NULL,
+    `kontak` VARCHAR(191) NULL,
+    `catatan` TEXT NULL,
+    `status` ENUM('PENDING', 'REJECTED', 'APPROVED') NOT NULL DEFAULT 'PENDING',
 
-    UNIQUE INDEX `Keuangan_id_key`(`id`),
+    UNIQUE INDEX `SumberDana_id_key`(`id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -227,10 +228,10 @@ ALTER TABLE `rab` ADD CONSTRAINT `rab_orgId_fkey` FOREIGN KEY (`orgId`) REFERENC
 ALTER TABLE `ListRab` ADD CONSTRAINT `ListRab_rabId_fkey` FOREIGN KEY (`rabId`) REFERENCES `rab`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Keuangan` ADD CONSTRAINT `Keuangan_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `SumberDana` ADD CONSTRAINT `SumberDana_orgId_fkey` FOREIGN KEY (`orgId`) REFERENCES `Organisasi`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Keuangan` ADD CONSTRAINT `Keuangan_orgId_fkey` FOREIGN KEY (`orgId`) REFERENCES `Organisasi`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `SumberDana` ADD CONSTRAINT `SumberDana_prokerId_fkey` FOREIGN KEY (`prokerId`) REFERENCES `program_kerja`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `notulensi` ADD CONSTRAINT `notulensi_divisiId_fkey` FOREIGN KEY (`divisiId`) REFERENCES `proker_divisi`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

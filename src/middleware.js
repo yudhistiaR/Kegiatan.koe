@@ -10,7 +10,8 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/api/webhooks(.*)',
   '/api/v1/me(.*)',
-  '/api/v1/(.*)'
+  '/api/v1/(.*)',
+  '/api/v2/(.*)'
 ])
 const isProtectedRoute = createRouteMatcher(['/(.*)/laporan'])
 
@@ -30,16 +31,13 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(onboardingUrl)
   }
 
-  if (!isPublicRoute(req)) {
-    await auth.protect()
-  }
+  if (userId && !isPublicRoute(req)) return NextResponse.next()
+
   if (isProtectedRoute(req)) {
     await auth.protect(has => {
       return has({ role: 'org:ketua' })
     })
   }
-
-  if (userId && !isPublicRoute(req)) return NextResponse.next()
 })
 
 export const config = {

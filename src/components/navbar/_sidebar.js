@@ -4,6 +4,7 @@
 import { useState, Fragment } from 'react'
 import { usePathname } from 'next/navigation'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { Toaster } from 'sonner'
 import Image from 'next/image'
 
 //Components
@@ -285,6 +286,15 @@ const SidebarWithTooltipProvider = ({ children }) => {
   return (
     <TooltipProvider>
       <Sidebar>{children}</Sidebar>
+      <Toaster
+        position="top-left"
+        toastOptions={{
+          classNames: {
+            toast:
+              '!bg-foreground !text-white !shaodw-lg !border !border-accentColor'
+          }
+        }}
+      />
     </TooltipProvider>
   )
 }

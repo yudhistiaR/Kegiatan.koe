@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQueryClient, useMutation } from '@tanstack/react-query'
 import { useForm, Controller } from 'react-hook-form'
-import { useUser } from '@clerk/nextjs'
+import { useAuth, useUser } from '@clerk/nextjs'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -14,11 +14,12 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 
 const OnBoardingPage = () => {
-  const { user } = useUser()
   const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(0)
-
+  const { userId } = useAuth()
+  const { user } = useUser()
   const queryClient = useQueryClient()
+
+  const [currentStep, setCurrentStep] = useState(0)
 
   const onboardingSteps = [
     {
@@ -47,31 +48,31 @@ const OnBoardingPage = () => {
 
   const updateUserProfile = useMutation({
     mutationFn: async data => {
-      console.log(data)
       const req = await fetch('/api/v1/me', {
         method: 'PUT',
         body: JSON.stringify(data)
       })
+
       return req.json()
     },
     onMutate: async newData => {
-      await queryClient.cancelQueries({ queryKey: ['me', user?.id] })
+      await queryClient.cancelQueries({ queryKey: ['me', userId] })
 
-      const previousData = queryClient.getQueryData(['me', user?.id])
+      const previousData = queryClient.getQueryData(['me', userId])
 
-      queryClient.setQueryData(['me', user.id], newData)
+      queryClient.setQueryData(['me', userId], newData)
 
       return { previousData }
     },
     onSuccess: () => {
       toast.success('Profile updated')
-      queryClient.invalidateQueries({ queryKey: ['me', user?.id] })
+      queryClient.invalidateQueries({ queryKey: ['me', userId] })
     },
-    onError: () => {
-      toast.error('Profile not updated')
+    onError: error => {
+      toast.error(`Profile not updated ${error.message}`)
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['me', user?.id] })
+      queryClient.invalidateQueries({ queryKey: ['me', userId] })
     }
   })
 
@@ -121,8 +122,8 @@ const OnBoardingPage = () => {
     if (currentStep === onboardingSteps.length - 1) {
       const res = await completeOnboarding(data)
       if (res?.message) {
-        await user?.reload()
         updateUserProfile.mutate(data)
+        await user.reload()
         router.push('/')
       }
     } else {
@@ -133,7 +134,7 @@ const OnBoardingPage = () => {
   const currentStepData = onboardingSteps[currentStep]
 
   return (
-    <div className="flex flex-col md:flex-row w-full h-screen p-4 md:p-5 rounded-lg shadow-md">
+    <section className="flex flex-col justify-center md:flex-row w-full h-screen p-4 md:p-5 rounded-lg shadow-md">
       {/* Bagian Kiri: Informasi Langkah dan Formulir */}
       <div className="flex-1 p-2 md:p-8 rounded-lg shadow-md">
         <div>
@@ -385,7 +386,7 @@ const OnBoardingPage = () => {
           {/* Anda bisa menambahkan ilustrasi atau animasi di sini */}
         </div>
       </div>
-    </div>
+    </section>
   )
 }
 

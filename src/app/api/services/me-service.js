@@ -6,7 +6,7 @@ export class MeService {
   async GETME(id) {
     return await this.prisma.user.findFirst({
       where: {
-        id: id ?? this.prisma.skip
+        id: id
       }
     })
   }

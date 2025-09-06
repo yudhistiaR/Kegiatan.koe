@@ -27,7 +27,13 @@ export async function POST(req) {
 
       try {
         await prisma.organisasi_member.upsert({
-          where: { clerkMemId: memId },
+          where: {
+            organisasiId_clerkMemId: {
+              organisasiId: org_id,
+              clerkMemId: memId
+            }
+          },
+
           update: {
             role: role
           },

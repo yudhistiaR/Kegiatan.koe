@@ -107,8 +107,8 @@ model Organisasi {
 model Organisasi_member {
   id           String @id @default(uuid())
   organisasiId String
-  clerkMemId   String @unique
-  memberId     String @unique
+  clerkMemId   String
+  memberId     String
   role         String
 
   user       User?       @relation(fields: [memberId], references: [id], onDelete: Cascade)
@@ -116,6 +116,8 @@ model Organisasi_member {
 
   created_at DateTime  @default(now()) @map("created_at")
   updated_at DateTime? @updatedAt @map("updated_at")
+
+  @@unique([organisasiId,clerkMemId])
 }
 
 model Divisi {
