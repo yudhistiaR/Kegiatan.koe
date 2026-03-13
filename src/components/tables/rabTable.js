@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { useParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { formatCurrency } from '@/lib/utils'

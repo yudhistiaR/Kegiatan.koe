@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 
 // Hooks
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { notFound, useParams } from 'next/navigation'
 
 //Components

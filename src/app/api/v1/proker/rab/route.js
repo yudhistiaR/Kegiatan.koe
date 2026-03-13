@@ -2,7 +2,7 @@ import { RabController } from '@/app/api/controllers/rab-controller'
 import { RabService } from '@/app/api/services/rab-service'
 import { Validation } from '@/helpers/validation'
 import { prisma } from '@/lib/prisma'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth-server'
 
 const rabService = new RabService(prisma)
 const rabController = new RabController(rabService, auth, Validation)

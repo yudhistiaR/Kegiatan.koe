@@ -6,7 +6,7 @@ import { TugasService } from '@/app/api/services/tugas-service'
 import { NotulenService } from '@/app/api/services/notulen-service'
 import { DivisiService } from '@/app/api/services/divisi-service'
 import { LaporanController } from '@/app/api/controllers/laporan-controller'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth-server'
 
 const organisasiService = new OrganisasiService(prisma)
 const prokerService = new ProkerService(prisma)

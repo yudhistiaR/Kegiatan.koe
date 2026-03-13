@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQueryClient, useMutation } from '@tanstack/react-query'
 import { useForm, Controller } from 'react-hook-form'
-import { useAuth, useUser } from '@clerk/nextjs'
+import { useAuth, useUser } from '@/lib/auth-ui'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'

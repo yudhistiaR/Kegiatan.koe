@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { LoadingState, ErrorState } from '../LoadState/LoadStatus'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { FundingCard } from './PendanaanCard'
 
 const PendanaanKegiatanPage = () => {
