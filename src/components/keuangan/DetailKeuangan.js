@@ -2,7 +2,7 @@
 
 import { Wallet, TrendingUp, TrendingDown } from 'lucide-react'
 
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { useQuery } from '@tanstack/react-query'
 import { formatCurrency } from '@/lib/utils'
 import { Button } from '../ui/button'

@@ -34,12 +34,12 @@ import {
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { useParams } from 'next/navigation'
 import { formatDate } from '@/helpers/formatedate'
 import { buttonVariants } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { Protect } from '@clerk/nextjs'
+import { Protect } from '@/lib/auth-ui'
 
 const CardListDivisi = () => {
   const { prokerId } = useParams()

@@ -1,6 +1,6 @@
 import { ReponseError } from '../errors/ResponseError'
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth-server'
 
 export class ProkerController {
   constructor(prokerService, clerk, errorCode, validation, schema) {

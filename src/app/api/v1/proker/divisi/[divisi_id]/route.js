@@ -3,7 +3,7 @@ import { DivisiService } from '@/app/api/services/divisi-service'
 import { DivisiController } from '@/app/api/controllers/divisi-controller'
 import { Validation } from '@/helpers/validation'
 import { DivisiSchema } from '@/schemas/frontend/divisi-schema'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth-server'
 
 const divisiService = new DivisiService(prisma)
 const divisiController = new DivisiController(

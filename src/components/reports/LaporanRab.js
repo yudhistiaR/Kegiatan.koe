@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { formatCurrency } from '@/lib/utils'
 import DataTable from '@/components/ui/DataTable'
 import {

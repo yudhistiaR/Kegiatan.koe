@@ -2,7 +2,7 @@
 
 //Hooks
 import { useParams } from 'next/navigation'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import DOMPurify from 'dompurify'

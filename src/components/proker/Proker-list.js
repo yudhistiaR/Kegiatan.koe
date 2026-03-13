@@ -2,7 +2,7 @@
 
 //Hooks
 import { useQuery } from '@tanstack/react-query'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { formatDate } from '@/helpers/formatedate'
 
 //components

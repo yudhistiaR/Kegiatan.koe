@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { ProkerService } from '@/app/api/services/proker-service'
 import { ProkerController } from '@/app/api/controllers/proker-controller'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth-server'
 
 import { ERROR_CODES } from '@/lib/errorCode'
 

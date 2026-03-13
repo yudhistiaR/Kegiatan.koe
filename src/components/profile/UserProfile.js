@@ -2,7 +2,7 @@
 
 import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query'
 import { useForm, Controller } from 'react-hook-form'
-import { useAuth, useUser } from '@clerk/nextjs'
+import { useAuth, useUser } from '@/lib/auth-ui'
 import { useState } from 'react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'

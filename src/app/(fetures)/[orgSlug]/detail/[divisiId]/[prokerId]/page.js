@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useParams, notFound } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 
 const KanbanBoard = dynamic(() => import('@/components/board/KanbanBoard'))
 const DivisiDetail = dynamic(() => import('@/components/divisi/detail-divisi'))

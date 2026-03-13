@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { StatistikController } from '@/app/api/controllers/statistik-controller'
 import { StatistikService } from '@/app/api/services/statistik-service'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth-server'
 
 const statistikService = new StatistikService(prisma)
 const statistikController = new StatistikController(statistikService, auth)

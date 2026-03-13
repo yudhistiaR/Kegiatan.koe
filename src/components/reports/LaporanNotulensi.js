@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { formatDate } from '@/helpers/formatedate'
 import DOMPurify from 'dompurify'
 import {
