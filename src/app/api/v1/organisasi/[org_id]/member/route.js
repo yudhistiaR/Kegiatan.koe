@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { OrganisasiService } from '@/app/api/services/organisasi-service'
 import { OrganisasiController } from '@/app/api/controllers/organisasi-controller'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth-server'
 
 const organisasiService = new OrganisasiService(prisma)
 const organisasiController = new OrganisasiController(organisasiService, auth)

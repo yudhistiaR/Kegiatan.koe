@@ -2,7 +2,7 @@ import { buttonVariants } from '@/components/ui/button'
 import Link from 'next/link'
 import Image from 'next/image'
 
-import { SignedIn, SignedOut, UserButton, useAuth } from '@clerk/nextjs'
+import { SignedIn, SignedOut, UserButton, useAuth } from '@/lib/auth-ui'
 
 export function PageLayout({ children, currentPage }) {
   const { orgSlug } = useAuth()

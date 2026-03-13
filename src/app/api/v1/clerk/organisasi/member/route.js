@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { auth, createClerkClient } from '@clerk/nextjs/server'
+import { auth, createClerkClient } from '@/lib/auth-server'
 
 const clerk = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY

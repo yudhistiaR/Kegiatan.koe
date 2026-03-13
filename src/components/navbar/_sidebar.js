@@ -16,7 +16,7 @@ import {
   SignedOut,
   SignInButton,
   UserButton
-} from '@clerk/nextjs'
+} from '@/lib/auth-ui'
 import {
   Tooltip,
   TooltipContent,

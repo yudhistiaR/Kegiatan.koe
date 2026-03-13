@@ -1,6 +1,6 @@
 'use server'
 
-import { auth, clerkClient } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@/lib/auth-server'
 
 export const completeOnboarding = async formData => {
   const { userId } = await auth()

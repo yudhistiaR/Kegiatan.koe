@@ -2,7 +2,7 @@
 
 import CreateProkerDivisi from './CreateProkerDivisi'
 import CardListDivisi from './CardListDivisi'
-import { Protect } from '@clerk/nextjs'
+import { Protect } from '@/lib/auth-ui'
 
 const ProkerDivisi = () => {
   return (

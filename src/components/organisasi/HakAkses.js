@@ -1,6 +1,6 @@
 'use client'
 
-import { Protect } from '@clerk/nextjs'
+import { Protect } from '@/lib/auth-ui'
 import { Button } from '../ui/button'
 
 const HakAkses = () => {

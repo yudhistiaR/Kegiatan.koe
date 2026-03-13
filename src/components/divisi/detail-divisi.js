@@ -42,10 +42,10 @@ import {
 import { Button } from '@/components/ui/button'
 import Multipleselect from '../ui/CustomeSelect'
 import { buttonVariants } from '../ui/button'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { toast } from 'sonner'
 import { LoadingState, ErrorState } from '@/components/LoadState/LoadStatus'
-import { Protect } from '@clerk/nextjs'
+import { Protect } from '@/lib/auth-ui'
 
 const columnHelper = createColumnHelper()
 

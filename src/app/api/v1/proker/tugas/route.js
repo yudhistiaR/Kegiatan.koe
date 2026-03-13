@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { TugasService } from '@/app/api/services/tugas-service'
 import { TugasController } from '@/app/api/controllers/tugas-controller'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth-server'
 import { Validation } from '@/helpers/validation'
 import { TugasSchema } from '@/schemas/backend/tugas-schema'
 

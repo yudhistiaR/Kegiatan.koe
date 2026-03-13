@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { Validation } from '@/helpers/validation'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth-server'
 import { MeService } from '@/app/api/services/me-service'
 import { MeController } from '@/app/api/controllers/me-conttroller'
 

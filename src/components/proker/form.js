@@ -4,7 +4,7 @@
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useId } from 'react'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query'
 
 //Components

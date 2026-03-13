@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Calendar, Edit, Eye, Building } from 'lucide-react'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { formatCurrency } from '@/lib/utils'
 import { formatDate } from '@/helpers/formatedate'
 

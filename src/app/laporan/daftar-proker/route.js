@@ -7,7 +7,7 @@ import {
   StyleSheet,
   renderToStream
 } from '@react-pdf/renderer'
-import { auth, createClerkClient } from '@clerk/nextjs/server'
+import { auth, createClerkClient } from '@/lib/auth-server'
 import { prisma } from '@/lib/prisma'
 
 const clerk = createClerkClient({

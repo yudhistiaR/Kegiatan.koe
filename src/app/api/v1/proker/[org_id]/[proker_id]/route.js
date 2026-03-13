@@ -3,7 +3,7 @@ import { ProkerController } from '@/app/api/controllers/proker-controller'
 import { ProkerService } from '@/app/api/services/proker-service'
 import { Validation } from '@/helpers/validation'
 import { ProkerSchema } from '@/schemas/backend/proker-schema'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth-server'
 
 const prokerService = new ProkerService(prisma)
 const prokerController = new ProkerController(

@@ -1,5 +1,5 @@
 'use client'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { useQuery } from '@tanstack/react-query'
 import {
   BriefcaseBusiness,

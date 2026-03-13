@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth-server'
 import ProkerList from '@/components/proker/Proker-list'
 import CreateProker from '@/components/proker/CreateProker'
 
