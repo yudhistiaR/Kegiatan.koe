@@ -1,30 +1,29 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
 
-const PUBLIC_ROUTES = [
-  '/',
-  '/tentang-kami',
-  '/why-free',
-  '/sign-in',
-  '/sign-up',
-  '/api/webhooks',
-  '/api/auth'
-]
+const PUBLIC_EXACT_ROUTES = ['/', '/tentang-kami', '/why-free', '/sign-in', '/sign-up']
+const PUBLIC_PREFIX_ROUTES = ['/api/webhooks', '/api/auth']
 
-export default async function middleware(req) {
-  const pathname = req.nextUrl.pathname
-  const isPublicRoute = PUBLIC_ROUTES.some(route => pathname.startsWith(route))
-
-  const session = await auth.api.getSession({
-    headers: req.headers
-  })
-
-  if (!session && !isPublicRoute) {
-    return NextResponse.redirect(new URL('/sign-in', req.url))
+function isPublicRoute(pathname) {
+  if (PUBLIC_EXACT_ROUTES.includes(pathname)) {
+    return true
   }
 
-  if (session?.user && pathname === '/onboarding') {
-    return NextResponse.next()
+  return PUBLIC_PREFIX_ROUTES.some(
+    route => pathname === route || pathname.startsWith(`${route}/`)
+  )
+}
+
+function hasSessionCookie(req) {
+  return req.cookies
+    .getAll()
+    .some(({ name }) => name.includes('better-auth') && name.includes('session_token'))
+}
+
+export default function middleware(req) {
+  const pathname = req.nextUrl.pathname
+
+  if (!hasSessionCookie(req) && !isPublicRoute(pathname)) {
+    return NextResponse.redirect(new URL('/sign-in', req.url))
   }
 
   return NextResponse.next()

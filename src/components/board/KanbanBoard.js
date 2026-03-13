@@ -18,14 +18,14 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { Plus, Calendar, Users, AlertCircle } from 'lucide-react'
 
 //components
 import { toast } from 'sonner'
 import CreatedTaskDialog from './CreatedTaskDialog'
 import { ErrorState } from '@/components/LoadState/LoadStatus'
-import { Protect } from '@clerk/nextjs'
+import { Protect } from '@/lib/auth-ui'
 
 //Kanban-components
 import DraggableItem from './DraggableItem'

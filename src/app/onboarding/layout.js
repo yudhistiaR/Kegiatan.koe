@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth-server'
 import { Toaster } from 'sonner'
 
 export default async function RootLayout({ children }) {

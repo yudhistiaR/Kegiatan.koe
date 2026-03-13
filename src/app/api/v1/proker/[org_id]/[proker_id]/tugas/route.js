@@ -3,7 +3,7 @@ import { TugasController } from '@/app/api/controllers/tugas-controller'
 import { TugasService } from '@/app/api/services/tugas-service'
 import { TugasSchema } from '@/schemas/backend/tugas-schema'
 import { Validation } from '@/helpers/validation'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from '@/lib/auth-server'
 
 const tugasService = new TugasService(prisma)
 const tugasController = new TugasController(

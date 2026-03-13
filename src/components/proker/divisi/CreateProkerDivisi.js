@@ -15,7 +15,7 @@ import { toast } from 'sonner'
 import { SingleSelect } from '@/components/ui/CustomeSelect'
 
 import { useId } from 'react'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth-ui'
 import { useParams } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { useQueryClient, useQuery, useMutation } from '@tanstack/react-query'
